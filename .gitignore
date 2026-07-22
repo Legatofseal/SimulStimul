@@ -1,0 +1,11 @@
+# Local development
+node_modules/
+.env
+.env.*
+!.env.example
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
