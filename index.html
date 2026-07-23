@@ -270,6 +270,7 @@
       <button type="button" id="eco-rise" class="btn btn-ghost" disabled>Всплыть</button>
       <button type="button" id="eco-camera-reset" class="btn btn-ghost">Общий вид</button>
     </div>
+    <button type="button" id="eco-reset" class="btn btn-ghost">Начать заново</button>
     <button type="button" id="eco-speed" class="btn btn-ghost">Скорость 1×</button>
   </div>
 
@@ -1353,6 +1354,7 @@ try {
   const status = document.getElementById('eco-status');
   const selectedPanel = document.getElementById('eco-selected');
   const selectedText = document.getElementById('eco-selected-text');
+  const resetButton = document.getElementById('eco-reset');
   const speedButton = document.getElementById('eco-speed');
   const logCount = document.getElementById('eco-log-count');
   const logToggle = document.getElementById('eco-log-toggle');
@@ -3985,6 +3987,11 @@ try {
     updateHud();
   });
   newExperimentButton.addEventListener('click', startNewExperiment);
+  resetButton.addEventListener('click', () => {
+    if (window.confirm('Начать эксперимент заново? Текущий мир и колония будут удалены.')) {
+      startNewExperiment();
+    }
+  });
   modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.ecoMode)));
   speedButton.addEventListener('click', () => {
     state.speedIndex = (state.speedIndex + 1) % speeds.length;
