@@ -222,6 +222,10 @@
   <div class="eco-world-layout">
     <div class="eco-map-wrap">
       <canvas id="eco-map" role="img" aria-label="Карта острова с биомами, организмами и пожарами"></canvas>
+      <div class="eco-lens-overlay" aria-hidden="true">
+        <span class="eco-lens-index">БИОСФЕРА · 01</span>
+        <span class="eco-lens-scale"><i></i> 120 мкм</span>
+      </div>
       <span id="eco-map-hint" class="viz-badge eco-map-hint">Бог: нажмите на клетку для статистики, Shift+клик — пожар</span>
       <span id="eco-weather-badge" class="viz-badge eco-weather-badge">☀ Ясно</span>
       <div id="eco-end-screen" class="eco-end-screen card" hidden role="dialog" aria-labelledby="eco-result-title">
@@ -701,6 +705,436 @@
     flex-direction: column;
   }
 }
+
+/* Visual edition: a living microscopic world under glass. */
+:root {
+  --background: #061012;
+  --foreground: #edf7f2;
+  --card: #0b1b1d;
+  --card-foreground: #edf7f2;
+  --muted: #12282a;
+  --muted-foreground: #8eaaa6;
+  --border: rgba(151, 220, 196, 0.18);
+  --input: rgba(13, 37, 39, 0.86);
+  --primary: #91f0ad;
+  --primary-foreground: #06130d;
+  --accent: #b89fe8;
+  --destructive: #ff765f;
+  --ring: #a1f7bb;
+  --viz-series-1: #8ef0a6;
+  --viz-series-2: #3fa378;
+  --viz-series-3: #79c9e9;
+  --viz-series-4: #d693dc;
+  --viz-series-5: #dcba69;
+  --viz-series-6: #4dc9c5;
+}
+
+html {
+  background: #03090b;
+}
+
+body {
+  max-width: 1480px;
+  padding: clamp(0.65rem, 1.5vw, 1.35rem);
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 75% -10%, rgba(85, 177, 148, 0.14), transparent 34rem),
+    radial-gradient(circle at 10% 70%, rgba(70, 128, 166, 0.1), transparent 34rem),
+    #061012;
+  font-family: "Segoe UI Variable", "Aptos", Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  opacity: 0.2;
+  background:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at 50% 20%, black, transparent 72%);
+}
+
+.card {
+  border-color: var(--border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(145deg, rgba(21, 49, 49, 0.77), rgba(8, 22, 24, 0.87));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.035),
+    0 16px 40px rgba(0, 4, 5, 0.18);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.btn,
+.form-select,
+.form-control {
+  border-color: rgba(157, 218, 199, 0.2);
+  border-radius: 0.7rem;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(164, 243, 191, 0.48);
+  background: rgba(32, 68, 62, 0.84);
+}
+
+.btn-primary {
+  border-color: rgba(169, 255, 197, 0.65);
+  background: linear-gradient(135deg, #a4f4b9, #70dca0);
+  box-shadow: 0 8px 24px rgba(77, 211, 137, 0.16);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b5fac7, #7ee3a8);
+}
+
+.viz-badge {
+  border-color: rgba(159, 226, 205, 0.18);
+  background: rgba(5, 17, 19, 0.7);
+  box-shadow: inset 0 1px rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+}
+
+.welcome-screen {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - 2.7rem);
+  overflow: hidden;
+  border: 1px solid rgba(142, 228, 196, 0.14);
+  border-radius: clamp(1rem, 2.8vw, 2rem);
+  background:
+    linear-gradient(90deg, rgba(3, 13, 15, 0.95) 0%, rgba(3, 13, 15, 0.78) 42%, rgba(3, 13, 15, 0.34) 100%),
+    linear-gradient(0deg, rgba(2, 9, 11, 0.7), transparent 55%),
+    url("assets/microcosm-atmosphere.jpg") center / cover no-repeat;
+  box-shadow: 0 28px 100px rgba(0, 3, 5, 0.5);
+}
+
+.welcome-screen::before,
+.welcome-screen::after {
+  position: absolute;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.welcome-screen::before {
+  right: 8%;
+  top: 13%;
+  width: min(36vw, 440px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 255, 221, 0.13);
+  box-shadow:
+    inset 0 0 80px rgba(106, 232, 188, 0.05),
+    0 0 80px rgba(77, 184, 175, 0.07);
+  animation: lens-breathe 8s ease-in-out infinite;
+}
+
+.welcome-screen::after {
+  left: 40%;
+  bottom: 16%;
+  width: 9rem;
+  aspect-ratio: 1;
+  opacity: 0.32;
+  background: radial-gradient(circle at 35% 30%, rgba(182,255,216,0.28), rgba(82,185,154,0.08) 38%, transparent 70%);
+  filter: blur(2px);
+  animation: cell-drift 12s ease-in-out infinite;
+}
+
+@keyframes lens-breathe {
+  50% { transform: scale(1.035); opacity: 0.72; }
+}
+
+@keyframes cell-drift {
+  50% { transform: translate(28px, -18px) rotate(8deg) scale(1.08); }
+}
+
+.welcome-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 3rem, 1160px);
+  grid-template-columns: minmax(0, 1.08fr) minmax(310px, 0.72fr);
+}
+
+.welcome-kicker {
+  color: #a6f5c0;
+  text-shadow: 0 0 24px rgba(137, 240, 174, 0.32);
+}
+
+.welcome-title {
+  font-size: clamp(3rem, 7.6vw, 6.6rem);
+  font-weight: 420;
+  line-height: 0.91;
+  text-wrap: balance;
+  text-shadow: 0 8px 34px rgba(0,0,0,0.34);
+}
+
+.welcome-title span {
+  color: #a6f0bd;
+}
+
+.welcome-intro {
+  color: #b4c9c4;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  text-shadow: 0 2px 12px #031012;
+}
+
+.welcome-rules {
+  padding: 1.2rem 1.4rem;
+  border: 1px solid rgba(162, 231, 210, 0.16);
+  border-radius: 1.2rem;
+  background: rgba(4, 16, 18, 0.7);
+  box-shadow: inset 0 1px rgba(255,255,255,0.035), 0 20px 60px rgba(0,0,0,0.22);
+  backdrop-filter: blur(20px);
+}
+
+.welcome-rule {
+  border-color: rgba(168, 226, 211, 0.11);
+}
+
+#ecosystem-game-prototype {
+  position: relative;
+}
+
+#ecosystem-game-prototype .eco-topline {
+  min-height: 2.2rem;
+}
+
+#ecosystem-game-prototype .eco-kicker {
+  color: #9fe9b7;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+#ecosystem-game-prototype .eco-hud {
+  gap: 0.75rem;
+}
+
+#ecosystem-game-prototype .eco-hud .card {
+  position: relative;
+  min-height: 6.5rem;
+  overflow: hidden;
+  padding: 0.85rem 1rem;
+}
+
+#ecosystem-game-prototype .eco-hud .card::after {
+  position: absolute;
+  right: -1.2rem;
+  bottom: -2rem;
+  width: 7rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
+  background: radial-gradient(circle, rgba(115, 230, 173, 0.09), transparent 68%);
+}
+
+#ecosystem-game-prototype .viz-stat-value {
+  color: #f1fff8;
+  font-size: 2rem;
+  font-weight: 460;
+  letter-spacing: -0.035em;
+}
+
+#ecosystem-game-prototype .eco-objective {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(152, 220, 200, 0.12);
+  border-radius: 0.85rem;
+  background: rgba(5, 17, 19, 0.54);
+}
+
+#ecosystem-game-prototype .eco-constructor {
+  border-color: rgba(157, 228, 205, 0.13);
+}
+
+#ecosystem-game-prototype .eco-constructor summary {
+  padding: 0.15rem 0;
+  color: #c8f4d6;
+}
+
+#ecosystem-game-prototype .eco-ability-grid label {
+  border-color: rgba(155, 223, 203, 0.13);
+  border-radius: 0.75rem;
+  background: rgba(6, 20, 21, 0.42);
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+#ecosystem-game-prototype .eco-ability-grid label:hover {
+  transform: translateY(-1px);
+  border-color: rgba(151, 237, 190, 0.36);
+  background: rgba(18, 44, 39, 0.62);
+}
+
+#ecosystem-game-prototype .eco-world-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+#ecosystem-game-prototype .eco-map-wrap {
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(150, 224, 200, 0.2);
+  border-radius: 1.15rem;
+  background: #061416;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.025),
+    inset 0 0 70px rgba(1, 6, 8, 0.34),
+    0 28px 70px rgba(0, 4, 6, 0.36);
+}
+
+#ecosystem-game-prototype #eco-map {
+  position: relative;
+  z-index: 0;
+  background: #071619;
+  cursor: crosshair;
+}
+
+#ecosystem-game-prototype .eco-map-wrap::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 48%, rgba(0, 5, 8, 0.24) 100%),
+    linear-gradient(105deg, rgba(255,255,255,0.035), transparent 23%, transparent 72%, rgba(120, 236, 210, 0.025));
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.28);
+}
+
+#ecosystem-game-prototype .eco-map-hint,
+#ecosystem-game-prototype .eco-weather-badge {
+  z-index: 3;
+  top: 0.8rem;
+}
+
+#ecosystem-game-prototype .eco-lens-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1rem;
+  color: rgba(213, 246, 236, 0.52);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+}
+
+#ecosystem-game-prototype .eco-lens-index {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+#ecosystem-game-prototype .eco-lens-scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#ecosystem-game-prototype .eco-lens-scale i {
+  display: inline-block;
+  width: 3.5rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: -1.75rem 0 0 -0.04rem currentColor inset;
+}
+
+#ecosystem-game-prototype .eco-inspector {
+  position: sticky;
+  top: 0.75rem;
+  max-height: clamp(28rem, 49vw, 43rem);
+  overflow: hidden;
+  border-color: rgba(148, 221, 198, 0.14);
+  background:
+    radial-gradient(circle at 110% 0, rgba(114, 220, 173, 0.1), transparent 13rem),
+    linear-gradient(155deg, rgba(19, 44, 43, 0.88), rgba(7, 20, 22, 0.93));
+  overflow-y: auto;
+}
+
+#ecosystem-game-prototype .eco-inspector-title {
+  color: #a6f0bc;
+  font-size: 0.73rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+#ecosystem-game-prototype .eco-inspector-heading {
+  font-size: 1.1rem;
+}
+
+#ecosystem-game-prototype .eco-inspector-row {
+  border-color: rgba(158, 217, 201, 0.1);
+}
+
+#ecosystem-game-prototype .eco-log-panel {
+  max-height: 15rem;
+  overflow: auto;
+}
+
+#ecosystem-game-prototype .eco-log-line {
+  padding: 0.34rem 0;
+  border-bottom: 1px solid rgba(152, 215, 197, 0.07);
+}
+
+#ecosystem-game-prototype .eco-dot {
+  position: relative;
+  width: 0.78rem;
+  height: 0.62rem;
+  border: 1px solid rgba(255,255,255,0.32);
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.68), currentColor 32%, color-mix(in srgb, currentColor 55%, #071315));
+  box-shadow: 0 0 8px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+#ecosystem-game-prototype .eco-dot-alien { color: var(--viz-series-1); border-radius: 55% 45% 58% 42%; }
+#ecosystem-game-prototype .eco-dot-grazer { color: var(--viz-series-3); border-radius: 60% 42% 60% 42%; transform: rotate(-12deg); }
+#ecosystem-game-prototype .eco-dot-predator { color: var(--viz-series-4); border-radius: 55% 55% 42% 42%; }
+#ecosystem-game-prototype .eco-dot-fire { color: var(--destructive); border-radius: 60% 40% 65% 35%; transform: rotate(28deg); }
+
+#ecosystem-game-prototype .eco-end-screen {
+  z-index: 6;
+  border-color: rgba(159, 245, 187, 0.45);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 50% 0, rgba(111, 227, 162, 0.14), transparent 18rem),
+    rgba(5, 18, 20, 0.92);
+  box-shadow: 0 30px 100px rgba(0,0,0,0.58);
+  backdrop-filter: blur(28px);
+}
+
+@media (max-width: 800px) {
+  .welcome-screen {
+    background-position: 60% center;
+  }
+
+  .welcome-shell {
+    width: min(100% - 1.5rem, 680px);
+  }
+
+  #ecosystem-game-prototype .eco-world-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #ecosystem-game-prototype .eco-inspector {
+    position: static;
+    max-height: none;
+    min-height: 12rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-screen::before,
+  .welcome-screen::after {
+    animation: none;
+  }
+}
 </style>
 
 <script>
@@ -793,6 +1227,16 @@
   const terrain = [];
   const landCells = [];
   const view = { width: 0, height: 0, dpr: 1 };
+  const visual = {
+    time: 0,
+    ambient: [],
+    effects: [],
+    hoverId: null,
+    terrainLayer: document.createElement('canvas'),
+    terrainDirty: true
+  };
+  visual.terrainLayer.width = LOGICAL_WIDTH;
+  visual.terrainLayer.height = LOGICAL_HEIGHT;
 
   const state = {
     mode: 'god',
@@ -933,6 +1377,50 @@
   function random() {
     state.rng = (1664525 * state.rng + 1013904223) >>> 0;
     return state.rng / 4294967296;
+  }
+
+  function visualHash(index, salt) {
+    const value = Math.sin((index + 1) * 12.9898 + (salt + 1) * 78.233) * 43758.5453;
+    return value - Math.floor(value);
+  }
+
+  function resetVisualField() {
+    visual.time = 0;
+    visual.effects.length = 0;
+    visual.hoverId = null;
+    visual.ambient = Array.from({ length: 84 }, (_, index) => ({
+      x: visualHash(index, 1) * LOGICAL_WIDTH,
+      y: visualHash(index, 2) * LOGICAL_HEIGHT,
+      radius: 0.7 + visualHash(index, 3) * 2.3,
+      depth: 0.25 + visualHash(index, 4) * 0.75,
+      phase: visualHash(index, 5) * Math.PI * 2
+    }));
+    visual.terrainDirty = true;
+  }
+
+  function emitVisualEffect(type, x, y, color, amount) {
+    const count = Math.max(1, amount || 1);
+    for (let index = 0; index < count; index += 1) {
+      const phase = visual.time * 3.7 + index * 2.399;
+      visual.effects.push({
+        type,
+        x,
+        y,
+        color: color || '#d8ffe5',
+        age: 0,
+        life: type === 'death' ? 1.4 : type === 'birth' ? 1.25 : type === 'fire' ? 1.05 : 0.62,
+        angle: phase,
+        speed: 18 + visualHash(index + visual.effects.length, 7) * 48,
+        size: 1.8 + visualHash(index + visual.effects.length, 8) * 4.8
+      });
+    }
+    if (visual.effects.length > 180) visual.effects.splice(0, visual.effects.length - 180);
+  }
+
+  function updateVisualEffects(seconds) {
+    visual.time += seconds;
+    for (const effect of visual.effects) effect.age += seconds;
+    visual.effects = visual.effects.filter((effect) => effect.age < effect.life);
   }
 
   function clamp(value, min, max) {
@@ -1240,6 +1728,12 @@
       thinkTimer: 0,
       reproTimer: 12 + random() * 12,
       pulse: random() * Math.PI * 2,
+      heading: random() * Math.PI * 2,
+      visualPhase: random() * Math.PI * 2,
+      visualSeed: random(),
+      vx: 0,
+      vy: 0,
+      hitFlash: 0,
       manualUntil: 0,
       stateLabel: 'исследует',
       decision: { action: 'explore', reason: 'мир ещё неизвестен', priority: 6, at: state.worldDays },
@@ -1379,6 +1873,12 @@
       entity.memory = entity.memory || null;
       entity.thinkTimer = Number(entity.thinkTimer) || 0;
       entity.reproTimer = Number(entity.reproTimer) || 0;
+      entity.heading = Number.isFinite(entity.heading) ? entity.heading : visualHash(entity.id, 31) * Math.PI * 2;
+      entity.visualPhase = Number.isFinite(entity.visualPhase) ? entity.visualPhase : visualHash(entity.id, 32) * Math.PI * 2;
+      entity.visualSeed = Number.isFinite(entity.visualSeed) ? entity.visualSeed : visualHash(entity.id, 33);
+      entity.vx = 0;
+      entity.vy = 0;
+      entity.hitFlash = 0;
     });
     state.fires = Array.isArray(saved.fires) ? saved.fires : [];
     state.fires.forEach((fire) => {
@@ -1771,8 +2271,19 @@
     const length = Math.hypot(dx, dy) || 1;
     const stepDistance = speed * dt;
     const moved = Math.min(stepDistance, length);
+    const previousX = entity.x;
+    const previousY = entity.y;
     entity.x = clamp(entity.x + dx / length * moved, 14, LOGICAL_WIDTH - 14);
     entity.y = clamp(entity.y + dy / length * moved, 14, LOGICAL_HEIGHT - 14);
+    const nextVx = dt > 0 ? (entity.x - previousX) / dt : 0;
+    const nextVy = dt > 0 ? (entity.y - previousY) / dt : 0;
+    entity.vx = (Number(entity.vx) || 0) * 0.72 + nextVx * 0.28;
+    entity.vy = (Number(entity.vy) || 0) * 0.72 + nextVy * 0.28;
+    if (Math.hypot(entity.vx, entity.vy) > 1) {
+      const desiredHeading = Math.atan2(entity.vy, entity.vx);
+      let headingDelta = ((desiredHeading - (Number(entity.heading) || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+      entity.heading = (Number(entity.heading) || 0) + headingDelta * clamp(dt * 6, 0, 0.42);
+    }
     entity.energy -= moved * entity.traits.movementCost * (sprinting ? 1.72 : 1);
     if (length < 15 || random() < dt * 0.025) entity.thinkTimer = 0;
   }
@@ -1792,10 +2303,12 @@
       const damage = attacker.traits.damage * (0.88 + attacker.traits.strength * 0.12) * armorFactor * venomMultiplier;
       if (attacker.energy < attackCost) continue;
       target.health -= damage;
+      target.hitFlash = 1;
       attacker.energy -= attackCost;
       attacker.attackTimer = attacker.traits.attackCooldown;
       target.stateLabel = 'атакован';
       target.thinkTimer = 0;
+      emitVisualEffect('attack', target.x, target.y, attacker.abilities && attacker.abilities.venom ? '#b7ff65' : '#ffe7b0', 4);
       if (attacker.id === state.selectedId || !attacker.attackLogAt || state.worldDays - attacker.attackLogAt > 4) {
         addEvent(attacker.name + ' атакует ' + target.name + ' (' + Math.round(damage) + ' урона).', 'combat');
         attacker.attackLogAt = state.worldDays;
@@ -1809,6 +2322,7 @@
         if (state.inspectedId === target.id) state.inspectedId = null;
         attacker.energy = clamp(attacker.energy + target.traits.maxEnergy * 0.34, 0, attacker.traits.maxEnergy);
         state.deaths += 1;
+        emitVisualEffect('death', target.x, target.y, target.kind === 'predator' ? '#e4a0df' : target.kind === 'alien' ? '#9af5b3' : '#91d7ed', 12);
         addEvent(attacker.name + ' уничтожил ' + targetName + '.', 'death');
       }
     }
@@ -1819,6 +2333,8 @@
       const base = archetypes[entity.kind];
       entity.age += dt;
       entity.pulse += dt * 2.3;
+      entity.visualPhase = (Number(entity.visualPhase) || 0) + dt * (1.15 + entity.traits.agility * 0.22);
+      entity.hitFlash = Math.max(0, (Number(entity.hitFlash) || 0) - dt * 3.6);
       entity.reproTimer -= dt;
       entity.thinkTimer -= dt;
       const fireDanger = nearestFireDanger(entity);
@@ -1863,6 +2379,7 @@
           entity.reproTimer = entity.traits.reproductionCooldown / Math.max(0.55, entity.traits.fertility);
           entity.thinkTimer = 0;
           state.births += 1;
+          emitVisualEffect('birth', child.x, child.y, child.kind === 'alien' ? '#a3ffc0' : child.kind === 'grazer' ? '#a2e7f8' : '#eface8', 10);
           if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение ' + child.generation + ': ' + child.name + ' от ' + entity.name + '. Цвет и признаки унаследованы с мутацией до 10%.', 'birth');
         }
       }
@@ -1907,6 +2424,7 @@
       spreadTimer: 1.4 + random() * 1.4,
       phase: random() * 6
     });
+    emitVisualEffect('fire', x, y, '#ff9b5d', 16);
     addEvent('Игрок поджёг ' + cell.type + '.', 'fire');
   }
 
@@ -2258,108 +2776,485 @@
     canvas.height = Math.max(1, Math.round(view.height * view.dpr));
   }
 
-  function drawTerrain(c) {
-    ctx.fillStyle = c.bg;
-    ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+  function coatColor(coat, lightShift, saturationShift) {
+    const normalized = normalizeCoat(coat, archetypes.alien.baseCoat);
+    return 'hsl(' + Math.round(normalized.hue) + ' ' +
+      Math.round(clamp(normalized.saturation + (saturationShift || 0), 0, 100)) + '% ' +
+      Math.round(clamp(normalized.lightness + (lightShift || 0), 6, 94)) + '%)';
+  }
+
+  function rebuildTerrainLayer() {
+    const layer = visual.terrainLayer;
+    const terrainContext = layer.getContext('2d');
     const cellWidth = LOGICAL_WIDTH / TERRAIN_COLS;
     const cellHeight = LOGICAL_HEIGHT / TERRAIN_ROWS;
-    const palette = { water: c.water, forest: c.forest, meadow: c.meadow, wetland: c.wetland, rock: c.rock, desert: c.desert, snow: c.snow };
+    const palette = {
+      water: ['#0a3037', '#0b4147'],
+      meadow: ['#31583b', '#426744'],
+      forest: ['#17392e', '#234b36'],
+      wetland: ['#244745', '#315657'],
+      rock: ['#465052', '#596164'],
+      desert: ['#79633f', '#94794c'],
+      snow: ['#9fb9b8', '#c3d2cd']
+    };
+
+    terrainContext.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    const ocean = terrainContext.createRadialGradient(LOGICAL_WIDTH * 0.48, LOGICAL_HEIGHT * 0.38, 30, LOGICAL_WIDTH * 0.5, LOGICAL_HEIGHT * 0.5, LOGICAL_WIDTH * 0.72);
+    ocean.addColorStop(0, '#0d4145');
+    ocean.addColorStop(0.52, '#092d34');
+    ocean.addColorStop(1, '#051a22');
+    terrainContext.fillStyle = ocean;
+    terrainContext.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+    terrainContext.save();
+    terrainContext.globalCompositeOperation = 'screen';
+    for (let index = 0; index < 34; index += 1) {
+      const x = visualHash(index, 40) * LOGICAL_WIDTH;
+      const y = visualHash(index, 41) * LOGICAL_HEIGHT;
+      const length = 70 + visualHash(index, 42) * 190;
+      terrainContext.globalAlpha = 0.025 + visualHash(index, 43) * 0.045;
+      terrainContext.strokeStyle = index % 2 ? '#7de4d2' : '#69b8d7';
+      terrainContext.lineWidth = 1 + visualHash(index, 44) * 2;
+      terrainContext.beginPath();
+      terrainContext.moveTo(x - length * 0.5, y);
+      terrainContext.bezierCurveTo(x - length * 0.2, y - 14, x + length * 0.2, y + 14, x + length * 0.5, y);
+      terrainContext.stroke();
+    }
+    terrainContext.restore();
+
+    terrainContext.save();
+    terrainContext.filter = 'blur(7px)';
+    for (const type of ['rock', 'desert', 'snow', 'wetland', 'forest', 'meadow']) {
+      terrainContext.globalAlpha = 0.98;
+      terrainContext.fillStyle = palette[type][0];
+      for (const cell of terrain) {
+        if (cell.type !== type) continue;
+        const radiusX = cellWidth * (0.72 + cell.variation * 0.18);
+        const radiusY = cellHeight * (0.72 + visualHash(cell.col, cell.row + 52) * 0.18);
+        terrainContext.beginPath();
+        terrainContext.ellipse(cell.x, cell.y, radiusX, radiusY, cell.variation * 0.5, 0, Math.PI * 2);
+        terrainContext.fill();
+      }
+    }
+    terrainContext.restore();
 
     for (const cell of terrain) {
-      ctx.globalAlpha = cell.type === 'water' ? 0.21 : cell.type === 'snow' ? 0.22 : 0.14 + cell.variation * 0.08;
-      ctx.fillStyle = palette[cell.type];
-      ctx.fillRect(cell.col * cellWidth, cell.row * cellHeight, cellWidth + 1, cellHeight + 1);
-      if (cell.scorched > 0) {
-        ctx.globalAlpha = Math.min(0.42, cell.scorched / 24);
-        ctx.fillStyle = c.fire;
-        ctx.fillRect(cell.col * cellWidth, cell.row * cellHeight, cellWidth + 1, cellHeight + 1);
+      if (cell.type === 'water') continue;
+      const colorsForCell = palette[cell.type];
+      if (cell.variation > 0.84) {
+        terrainContext.globalAlpha = 0.1 + cell.variation * 0.06;
+        terrainContext.fillStyle = colorsForCell[1];
+        terrainContext.beginPath();
+        terrainContext.ellipse(
+          cell.x - 3 + cell.variation * 6,
+          cell.y - 3,
+          cellWidth * (0.75 + cell.variation * 0.22),
+          cellHeight * (0.68 + cell.variation * 0.18),
+          -cell.variation * 0.7,
+          0,
+          Math.PI * 2
+        );
+        terrainContext.fill();
       }
-      ctx.globalAlpha = 1;
 
-      if (cell.type === 'forest' && cell.variation > 0.25) {
-        ctx.globalAlpha = 0.34;
-        ctx.strokeStyle = c.forest;
-        ctx.lineWidth = 2;
+      terrainContext.globalAlpha = 0.22;
+      terrainContext.lineWidth = 0.8;
+      if (cell.type === 'rock' && cell.variation > 0.22) {
+        terrainContext.strokeStyle = '#a6b0ae';
+        terrainContext.beginPath();
+        terrainContext.moveTo(cell.x - 8, cell.y + 5);
+        terrainContext.lineTo(cell.x - 1, cell.y - 7);
+        terrainContext.lineTo(cell.x + 8, cell.y + 4);
+        terrainContext.stroke();
+      } else if (cell.type === 'desert' && cell.variation > 0.3) {
+        terrainContext.strokeStyle = '#e2c27e';
+        terrainContext.beginPath();
+        terrainContext.arc(cell.x, cell.y + 2, 9, Math.PI * 1.12, Math.PI * 1.88);
+        terrainContext.stroke();
+      } else if (cell.type === 'snow' && cell.variation > 0.35) {
+        terrainContext.fillStyle = '#f1fffa';
+        terrainContext.beginPath();
+        terrainContext.arc(cell.x - 5, cell.y - 2, 1.5, 0, Math.PI * 2);
+        terrainContext.arc(cell.x + 5, cell.y + 3, 1, 0, Math.PI * 2);
+        terrainContext.fill();
+      } else if (cell.type === 'wetland' && cell.variation > 0.42) {
+        terrainContext.strokeStyle = '#76c3af';
+        terrainContext.beginPath();
+        terrainContext.arc(cell.x, cell.y, 7, 0.15, Math.PI * 1.1);
+        terrainContext.stroke();
+      }
+    }
+    terrainContext.globalAlpha = 1;
+
+    const glassLight = terrainContext.createLinearGradient(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    glassLight.addColorStop(0, 'rgba(190,255,231,0.045)');
+    glassLight.addColorStop(0.35, 'rgba(255,255,255,0)');
+    glassLight.addColorStop(1, 'rgba(69,162,174,0.035)');
+    terrainContext.fillStyle = glassLight;
+    terrainContext.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    visual.terrainDirty = false;
+  }
+
+  function drawPlantFrond(cell, foodRatio) {
+    const phase = visual.time * 0.42 + cell.variation * 12;
+    const height = 5 + foodRatio * 11 + cell.variation * 3;
+    const sway = Math.sin(phase) * 2;
+    ctx.globalAlpha = 0.18 + foodRatio * 0.46;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = cell.type === 'forest' ? '#72c98d' : cell.type === 'wetland' ? '#63c7aa' : '#9ad981';
+    ctx.lineWidth = cell.type === 'forest' ? 1.6 : 1.15;
+    for (let index = 0; index < (cell.type === 'forest' ? 3 : 2); index += 1) {
+      const offset = (index - 1) * 4;
+      ctx.beginPath();
+      ctx.moveTo(cell.x + offset, cell.y + 7);
+      ctx.quadraticCurveTo(cell.x + offset + sway, cell.y + 2, cell.x + offset + sway * 1.3, cell.y + 7 - height);
+      ctx.stroke();
+      if (foodRatio > 0.45) {
+        ctx.fillStyle = cell.type === 'forest' ? '#b2ef9c' : '#b9e890';
         ctx.beginPath();
-        ctx.moveTo(cell.x - 5, cell.y + 5);
-        ctx.lineTo(cell.x, cell.y - 6);
-        ctx.lineTo(cell.x + 5, cell.y + 5);
-        ctx.stroke();
-      } else if (cell.type === 'water') {
-        ctx.globalAlpha = 0.23;
-        ctx.strokeStyle = c.water;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(cell.x - 8, cell.y);
-        ctx.quadraticCurveTo(cell.x, cell.y - 3, cell.x + 8, cell.y);
-        ctx.stroke();
-      } else if (cell.type === 'desert') {
-        ctx.globalAlpha = 0.23;
-        ctx.strokeStyle = c.desert;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cell.x - 5, cell.y + 4);
-        ctx.lineTo(cell.x + 5, cell.y - 4);
-        ctx.stroke();
-      } else if (cell.type === 'snow') {
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = c.snow;
-        ctx.beginPath();
-        ctx.arc(cell.x - 4, cell.y, 2, 0, Math.PI * 2);
-        ctx.arc(cell.x + 4, cell.y + 3, 1.6, 0, Math.PI * 2);
+        ctx.ellipse(cell.x + offset + sway * 1.2, cell.y + 8 - height, 2.4, 1.3, phase, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.globalAlpha = 1;
+    }
+    ctx.lineCap = 'butt';
+  }
+
+  function drawTerrain() {
+    if (visual.terrainDirty) rebuildTerrainLayer();
+    ctx.globalAlpha = 1;
+    ctx.drawImage(visual.terrainLayer, 0, 0);
+
+    for (const mote of visual.ambient) {
+      const x = (mote.x + visual.time * (2 + mote.depth * 5) + Math.sin(visual.time * 0.4 + mote.phase) * 8) % LOGICAL_WIDTH;
+      const y = mote.y + Math.cos(visual.time * 0.28 + mote.phase) * 7;
+      ctx.globalAlpha = 0.035 + mote.depth * 0.11;
+      ctx.fillStyle = mote.depth > 0.65 ? '#a7efd5' : '#77bac4';
+      ctx.beginPath();
+      ctx.arc(x, y, mote.radius, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    ctx.globalAlpha = 0.14;
-    ctx.strokeStyle = c.border;
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= LOGICAL_WIDTH; x += cellWidth) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, LOGICAL_HEIGHT);
-      ctx.stroke();
+    for (const cell of terrain) {
+      const maximum = foodMax(cell.type);
+      const foodRatio = maximum ? clamp(cell.food / maximum, 0, 1) : 0;
+      if (foodRatio > 0.12 && cell.variation > 0.76 && (cell.type === 'meadow' || cell.type === 'forest' || cell.type === 'wetland')) {
+        drawPlantFrond(cell, foodRatio);
+      }
+      if (cell.scorched > 0) {
+        const burned = clamp(cell.scorched / 12, 0, 1);
+        ctx.globalAlpha = 0.2 + burned * 0.4;
+        ctx.fillStyle = '#160f0d';
+        ctx.beginPath();
+        ctx.ellipse(cell.x, cell.y, 14 + cell.variation * 6, 12 + cell.variation * 5, cell.variation, 0, Math.PI * 2);
+        ctx.fill();
+        if (burned > 0.55 && cell.variation > 0.5) {
+          ctx.globalAlpha = burned * 0.58;
+          ctx.fillStyle = '#ed7549';
+          ctx.beginPath();
+          ctx.arc(cell.x + Math.sin(cell.variation * 8) * 7, cell.y + 3, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
-    for (let y = 0; y <= LOGICAL_HEIGHT; y += cellHeight) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(LOGICAL_WIDTH, y);
-      ctx.stroke();
+
+    if (state.selectedCell) {
+      const selectedCell = terrain[state.selectedCell.row * TERRAIN_COLS + state.selectedCell.col];
+      if (selectedCell) {
+        const pulse = 0.5 + Math.sin(visual.time * 3.5) * 0.12;
+        ctx.globalAlpha = pulse;
+        ctx.strokeStyle = '#d5fce6';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.ellipse(selectedCell.x, selectedCell.y, 17, 15, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
     ctx.globalAlpha = 1;
   }
 
-  function drawFires(c) {
+  function drawFires() {
     for (const fire of state.fires) {
       const intensity = clamp(0.22 + fire.fuel / 85 - fire.wetness * 0.08, 0.18, 1);
-      const pulse = 1 + Math.sin(fire.phase + fire.age * 5) * 0.08 * intensity;
-      ctx.globalAlpha = 0.12 * intensity;
-      ctx.fillStyle = c.fire;
+      const pulse = 1 + Math.sin(fire.phase + visual.time * 7) * 0.08 * intensity;
+      const glow = ctx.createRadialGradient(fire.x, fire.y, 2, fire.x, fire.y, fire.radius * 1.08);
+      glow.addColorStop(0, 'rgba(255,225,126,' + (0.34 * intensity) + ')');
+      glow.addColorStop(0.35, 'rgba(255,112,55,' + (0.24 * intensity) + ')');
+      glow.addColorStop(1, 'rgba(255,54,28,0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(fire.x, fire.y, fire.radius * pulse, 0, Math.PI * 2);
+      ctx.arc(fire.x, fire.y, fire.radius * pulse * 1.08, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = 0.48 + intensity * 0.3;
-      ctx.strokeStyle = c.fire;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(fire.x, fire.y, fire.radius * 0.72, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 0.35 + intensity * 0.55;
-      ctx.fillStyle = c.fire;
-      const flameCount = Math.max(1, Math.ceil(4 * intensity));
-      for (let i = 0; i < flameCount; i += 1) {
-        const angle = fire.phase + i * 1.57;
-        const px = fire.x + Math.cos(angle) * fire.radius * 0.42;
-        const py = fire.y + Math.sin(angle) * fire.radius * 0.42;
+
+      const flameCount = Math.max(2, Math.ceil(7 * intensity));
+      for (let index = 0; index < flameCount; index += 1) {
+        const angle = fire.phase + index * 2.4;
+        const orbit = fire.radius * (0.18 + visualHash(index, Math.floor(fire.x)) * 0.45);
+        const x = fire.x + Math.cos(angle) * orbit;
+        const y = fire.y + Math.sin(angle) * orbit;
+        const height = 10 + intensity * 16 + Math.sin(visual.time * 9 + index) * 3;
+        ctx.globalAlpha = 0.58 + intensity * 0.34;
+        ctx.fillStyle = index % 3 === 0 ? '#ffd36f' : index % 2 ? '#ff8b45' : '#f45b38';
         ctx.beginPath();
-        ctx.moveTo(px, py - 12);
-        ctx.lineTo(px - 7, py + 7);
-        ctx.lineTo(px + 7, py + 7);
-        ctx.closePath();
+        ctx.moveTo(x, y - height);
+        ctx.bezierCurveTo(x - 6, y - height * 0.45, x - 7, y + 5, x, y + 8);
+        ctx.bezierCurveTo(x + 7, y + 4, x + 5, y - height * 0.38, x, y - height);
         ctx.fill();
       }
-      ctx.globalAlpha = 1;
+
+      for (let index = 0; index < 4; index += 1) {
+        const smokeAge = (visual.time * (0.22 + index * 0.025) + index * 0.23 + fire.phase) % 1;
+        const smokeX = fire.x + Math.sin(fire.phase + index * 2 + smokeAge * 4) * fire.radius * 0.28;
+        const smokeY = fire.y - fire.radius * 0.2 - smokeAge * 52;
+        ctx.globalAlpha = (1 - smokeAge) * 0.11 * intensity;
+        ctx.fillStyle = '#b8c3b4';
+        ctx.beginPath();
+        ctx.arc(smokeX, smokeY, 7 + smokeAge * 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function traceAmoeba(radius, phase, seed, stretch) {
+    const points = [];
+    const count = 18;
+    for (let index = 0; index < count; index += 1) {
+      const angle = index / count * Math.PI * 2;
+      const wave = 1 + Math.sin(angle * 3 + phase + seed * 9) * 0.11 + Math.sin(angle * 5 - phase * 0.72 + seed * 15) * 0.055;
+      points.push({
+        x: Math.cos(angle) * radius * wave * stretch,
+        y: Math.sin(angle) * radius * wave * (0.82 + Math.sin(phase * 0.7) * 0.025)
+      });
+    }
+    const first = points[0];
+    const last = points[points.length - 1];
+    ctx.beginPath();
+    ctx.moveTo((last.x + first.x) * 0.5, (last.y + first.y) * 0.5);
+    for (let index = 0; index < points.length; index += 1) {
+      const current = points[index];
+      const next = points[(index + 1) % points.length];
+      ctx.quadraticCurveTo(current.x, current.y, (current.x + next.x) * 0.5, (current.y + next.y) * 0.5);
+    }
+    ctx.closePath();
+  }
+
+  function drawAmoeba(entity, radius, coat, alpha) {
+    const movement = clamp(Math.hypot(entity.vx || 0, entity.vy || 0) / Math.max(1, entity.traits.maxSpeed), 0, 1);
+    const stretch = 1.02 + movement * 0.22;
+    traceAmoeba(radius, entity.visualPhase, entity.visualSeed, stretch);
+    const membrane = ctx.createRadialGradient(-radius * 0.35, -radius * 0.35, radius * 0.1, 0, 0, radius * 1.35);
+    membrane.addColorStop(0, coatColor(coat, 24, -8));
+    membrane.addColorStop(0.48, coatColor(coat, 4, 4));
+    membrane.addColorStop(1, coatColor(coat, -14, 2));
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = membrane;
+    ctx.fill();
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.strokeStyle = coatColor(coat, 28, -12);
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+
+    ctx.globalAlpha = alpha * 0.42;
+    ctx.fillStyle = coatColor(coat, -24, 8);
+    ctx.beginPath();
+    ctx.ellipse(radius * 0.1, -radius * 0.02, radius * 0.3, radius * 0.23, entity.visualSeed * 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = coatColor(coat, 30, -18);
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    for (let index = 0; index < 5; index += 1) {
+      const angle = entity.visualSeed * 7 + index * 2.21;
+      const distanceFromCenter = radius * (0.25 + visualHash(entity.id + index, 60) * 0.38);
+      const organelleRadius = radius * (0.055 + visualHash(entity.id + index, 61) * 0.055);
+      ctx.globalAlpha = alpha * (entity.diet === 'solar' ? 0.72 : 0.34);
+      ctx.fillStyle = entity.diet === 'solar' ? '#b8ed6b' : coatColor(coat, 30, -18);
+      ctx.beginPath();
+      ctx.arc(Math.cos(angle) * distanceFromCenter, Math.sin(angle) * distanceFromCenter * 0.72, organelleRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawGrazer(entity, radius, coat, alpha) {
+    const wiggle = Math.sin(entity.visualPhase * 1.7) * 0.07;
+    const length = radius * 1.55;
+    const width = radius * 0.82;
+
+    ctx.globalAlpha = alpha * 0.62;
+    ctx.strokeStyle = coatColor(coat, 30, -18);
+    ctx.lineWidth = 0.75;
+    for (let index = 0; index < 18; index += 1) {
+      const angle = index / 18 * Math.PI * 2;
+      const x = Math.cos(angle) * length;
+      const y = Math.sin(angle) * width;
+      const cilium = 2.5 + Math.sin(entity.visualPhase * 4 + index) * 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angle + wiggle) * cilium, y + Math.sin(angle + wiggle) * cilium);
+      ctx.stroke();
+    }
+
+    const body = ctx.createLinearGradient(-length, -width, length, width);
+    body.addColorStop(0, coatColor(coat, 22, -12));
+    body.addColorStop(0.5, coatColor(coat, 3, 4));
+    body.addColorStop(1, coatColor(coat, -15, 4));
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, length, width, wiggle, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.strokeStyle = coatColor(coat, 31, -15);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.globalAlpha = alpha * 0.35;
+    ctx.strokeStyle = coatColor(coat, -24, 6);
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.bezierCurveTo(-radius * 0.2, -width * 0.68, radius * 0.15, -width * 0.35, radius * 0.42, width * 0.48);
+    ctx.stroke();
+
+    ctx.fillStyle = coatColor(coat, -25, 10);
+    ctx.beginPath();
+    ctx.ellipse(-radius * 0.2, 0, radius * 0.28, radius * 0.2, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    for (let index = 0; index < 3; index += 1) {
+      ctx.globalAlpha = alpha * 0.38;
+      ctx.fillStyle = coatColor(coat, 30, -20);
+      ctx.beginPath();
+      ctx.arc(radius * (0.35 + index * 0.23), radius * Math.sin(index * 2.4) * 0.28, radius * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawPredator(entity, radius, coat, alpha) {
+    const length = radius * 1.38;
+    const width = radius * 0.84;
+    const tailWave = Math.sin(entity.visualPhase * 1.35) * radius * 0.12;
+
+    ctx.globalAlpha = alpha * 0.58;
+    ctx.strokeStyle = coatColor(coat, 18, -8);
+    ctx.lineWidth = 1.1;
+    for (let index = 0; index < 5; index += 1) {
+      const x = -radius * 0.5 + index * radius * 0.26;
+      const spread = width * (0.74 - Math.abs(index - 2) * 0.07);
+      ctx.beginPath();
+      ctx.moveTo(x, spread * 0.62);
+      ctx.quadraticCurveTo(x - radius * 0.15, spread + tailWave * 0.2, x - radius * 0.32, spread + radius * 0.25);
+      ctx.moveTo(x, -spread * 0.62);
+      ctx.quadraticCurveTo(x - radius * 0.15, -spread - tailWave * 0.2, x - radius * 0.32, -spread - radius * 0.25);
+      ctx.stroke();
+    }
+
+    const shell = ctx.createLinearGradient(-length, -width, length, width);
+    shell.addColorStop(0, coatColor(coat, -17, 7));
+    shell.addColorStop(0.44, coatColor(coat, 12, 0));
+    shell.addColorStop(0.7, coatColor(coat, -3, 5));
+    shell.addColorStop(1, coatColor(coat, -24, 8));
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = shell;
+    ctx.beginPath();
+    ctx.moveTo(length, 0);
+    ctx.bezierCurveTo(length * 0.76, -width * 0.9, -length * 0.36, -width * 1.02, -length, -tailWave * 0.15);
+    ctx.bezierCurveTo(-length * 0.36, width * 1.02, length * 0.76, width * 0.9, length, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = alpha * 0.68;
+    ctx.strokeStyle = coatColor(coat, 25, -12);
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+
+    for (let index = 0; index < 7; index += 1) {
+      const x = -length * 0.68 + index * length * 0.2;
+      const segmentWidth = width * (0.82 - Math.abs(index - 3) * 0.045);
+      ctx.globalAlpha = alpha * (0.3 + index * 0.025);
+      ctx.strokeStyle = coatColor(coat, -18, 6);
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(x, -segmentWidth);
+      ctx.quadraticCurveTo(x + radius * 0.12, 0, x, segmentWidth);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.fillStyle = coatColor(coat, -30, 10);
+    ctx.beginPath();
+    ctx.ellipse(length * 0.52, 0, radius * 0.34, radius * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#d9f7df';
+    ctx.beginPath();
+    ctx.arc(length * 0.62, -radius * 0.25, Math.max(1, radius * 0.065), 0, Math.PI * 2);
+    ctx.arc(length * 0.62, radius * 0.25, Math.max(1, radius * 0.065), 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = entity.abilities && entity.abilities.venom ? '#baff6e' : coatColor(coat, 30, -12);
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(length * 0.72, -radius * 0.25);
+    ctx.quadraticCurveTo(length * 1.08, -radius * 0.48, length * 1.18, -radius * 0.18);
+    ctx.moveTo(length * 0.72, radius * 0.25);
+    ctx.quadraticCurveTo(length * 1.08, radius * 0.48, length * 1.18, radius * 0.18);
+    ctx.stroke();
+  }
+
+  function drawEntityIndicators(entity, radius, speciesColor, isSelected, isHovered) {
+    if (!isSelected && !isHovered && entity.health >= entity.traits.maxHealth * 0.42) return;
+    const healthRatio = clamp(entity.health / entity.traits.maxHealth, 0, 1);
+    const energyRatio = clamp(entity.energy / entity.traits.maxEnergy, 0, 1);
+    ctx.save();
+    ctx.translate(entity.x, entity.y);
+    if (isSelected || isHovered) {
+      const pulse = 1 + Math.sin(visual.time * 3.2) * 0.06;
+      ctx.globalAlpha = isSelected ? 0.62 : 0.32;
+      ctx.strokeStyle = speciesColor;
+      ctx.lineWidth = isSelected ? 1.8 : 1;
+      ctx.setLineDash(isSelected ? [5, 5] : [2, 5]);
+      ctx.beginPath();
+      ctx.arc(0, 0, (radius + 9) * pulse, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.globalAlpha = 0.72;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(1,9,10,0.68)';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius + 5, Math.PI * 0.12, Math.PI * 0.88);
+    ctx.stroke();
+    ctx.strokeStyle = healthRatio > 0.42 ? '#8be8a7' : '#ff765f';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius + 5, Math.PI * 0.12, Math.PI * (0.12 + 0.76 * healthRatio));
+    ctx.stroke();
+    if (isSelected) {
+      ctx.strokeStyle = '#7fd7ef';
+      ctx.beginPath();
+      ctx.arc(0, 0, radius + 8, Math.PI * 1.12, Math.PI * (1.12 + 0.76 * energyRatio));
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    if (isSelected || isHovered) {
+      const label = entity.name + ' · ' + (entity.stateLabel || 'наблюдает');
+      ctx.save();
+      ctx.font = '500 11px "Segoe UI Variable", sans-serif';
+      const width = ctx.measureText(label).width + 14;
+      const x = clamp(entity.x - width * 0.5, 6, LOGICAL_WIDTH - width - 6);
+      const y = Math.max(7, entity.y - radius - 28);
+      ctx.globalAlpha = 0.82;
+      ctx.fillStyle = '#061416';
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, 20, 8);
+      ctx.fill();
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = '#e8faf1';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, x + width * 0.5, y + 10.5);
+      ctx.restore();
     }
   }
 
@@ -2367,95 +3262,172 @@
     const base = archetypes[entity.kind];
     const speciesColor = entity.kind === 'alien' ? c.alien : entity.kind === 'grazer' ? c.grazer : c.predator;
     const coat = normalizeCoat(entity.displayCoat || entity.coat, base.baseCoat);
-    const color = 'hsl(' + Math.round(coat.hue) + ' ' + Math.round(coat.saturation) + '% ' + Math.round(coat.lightness) + '%)';
-    const radius = base.baseSize * entity.traits.size * 6.5 + Math.sin(entity.pulse) * 0.8;
+    const radius = 6.5 + base.baseSize * entity.traits.size * 7.6 + Math.sin(entity.pulse) * 0.48;
     const isSelected = entity.id === state.selectedId;
+    const isHovered = entity.id === visual.hoverId;
+    const visibility = entityVisibility(entity);
+    const bodyAlpha = clamp(0.48 + visibility * 0.48, 0.5, 0.97);
+    const movement = Math.hypot(entity.vx || 0, entity.vy || 0);
 
-    if (isSelected) {
-      ctx.globalAlpha = 0.24;
-      ctx.strokeStyle = speciesColor;
-      ctx.lineWidth = 3;
+    if (entity.abilities && entity.abilities.sprint && movement > entity.traits.maxSpeed * 0.8) {
+      ctx.save();
+      ctx.globalAlpha = 0.1;
+      ctx.strokeStyle = coatColor(coat, 18, -10);
+      ctx.lineWidth = radius * 0.42;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.arc(entity.x, entity.y, radius + 10, 0, Math.PI * 2);
+      ctx.moveTo(entity.x - Math.cos(entity.heading) * radius * 2.4, entity.y - Math.sin(entity.heading) * radius * 2.4);
+      ctx.lineTo(entity.x - Math.cos(entity.heading) * radius * 0.75, entity.y - Math.sin(entity.heading) * radius * 0.75);
       ctx.stroke();
-      ctx.globalAlpha = 1;
+      ctx.restore();
     }
 
-    ctx.globalAlpha = clamp(0.68 + entityVisibility(entity) * 0.28, 0.7, 0.96);
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    if (base.shape === 'alien') {
-      ctx.ellipse(entity.x, entity.y, radius * 1.28, radius * 0.83, entity.pulse * 0.12, 0, Math.PI * 2);
-    } else if (base.shape === 'predator') {
-      ctx.moveTo(entity.x, entity.y - radius);
-      ctx.lineTo(entity.x + radius, entity.y + radius);
-      ctx.lineTo(entity.x - radius, entity.y + radius);
-      ctx.closePath();
-    } else {
-      ctx.arc(entity.x, entity.y, radius, 0, Math.PI * 2);
+    ctx.save();
+    ctx.translate(entity.x, entity.y);
+    ctx.rotate(Number(entity.heading) || 0);
+    ctx.shadowColor = coatColor(coat, 8, 0);
+    ctx.shadowBlur = isSelected ? 13 : entity.kind === 'alien' ? 6 : 3;
+    if (entity.hitFlash > 0) {
+      ctx.globalAlpha = entity.hitFlash * 0.55;
+      ctx.fillStyle = '#fff7db';
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 1.25, 0, Math.PI * 2);
+      ctx.fill();
     }
-    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if (entity.kind === 'alien') drawAmoeba(entity, radius, coat, bodyAlpha);
+    else if (entity.kind === 'grazer') drawGrazer(entity, radius, coat, bodyAlpha);
+    else drawPredator(entity, radius, coat, bodyAlpha);
 
     if (entity.abilities && entity.abilities.chameleon) {
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = speciesColor;
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([2.5, 2.5]);
+      ctx.globalAlpha = 0.2 + Math.sin(visual.time * 2.3 + entity.visualPhase) * 0.06;
+      ctx.strokeStyle = '#d5ffeb';
+      ctx.lineWidth = 0.8;
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 1.2, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
     }
-
-    ctx.globalAlpha = 0.92;
-    ctx.fillStyle = c.bg;
-    ctx.beginPath();
-    ctx.arc(entity.x + radius * 0.32, entity.y - radius * 0.22, Math.max(1.6, radius * 0.18), 0, Math.PI * 2);
-    ctx.fill();
+    if (entity.abilities && entity.abilities.regeneration && entity.health < entity.traits.maxHealth * 0.96 && entity.energy > entity.traits.maxEnergy * 0.48) {
+      for (let index = 0; index < 3; index += 1) {
+        const angle = visual.time * 1.9 + entity.visualPhase + index * Math.PI * 0.67;
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#8dffc3';
+        ctx.beginPath();
+        ctx.arc(Math.cos(angle) * radius * 1.25, Math.sin(angle) * radius * 1.25, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
     ctx.globalAlpha = 1;
 
-    if (entity.health < entity.traits.maxHealth * 0.55) {
-      ctx.globalAlpha = 0.45;
-      ctx.strokeStyle = c.fire;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(entity.x, entity.y, radius + 4, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
+    drawEntityIndicators(entity, radius, speciesColor, isSelected, isHovered);
   }
 
-  function drawEndState(c) {
-    if (state.gameStatus === 'playing') return;
-    ctx.globalAlpha = 0.8;
-    ctx.fillStyle = c.bg;
-    ctx.fillRect(260, 290, 680, 120);
+  function drawVisualEffects() {
+    for (const effect of visual.effects) {
+      const progress = clamp(effect.age / effect.life, 0, 1);
+      const fade = 1 - progress;
+      const travel = effect.speed * effect.age;
+      const x = effect.x + Math.cos(effect.angle) * travel;
+      const y = effect.y + Math.sin(effect.angle) * travel - (effect.type === 'birth' ? travel * 0.38 : effect.type === 'death' ? travel * 0.16 : 0);
+      ctx.globalAlpha = fade * (effect.type === 'attack' ? 0.86 : 0.62);
+      ctx.fillStyle = effect.color;
+      ctx.beginPath();
+      ctx.arc(x, y, effect.size * (effect.type === 'death' ? 1 - progress * 0.45 : 1), 0, Math.PI * 2);
+      ctx.fill();
+      if (effect.type === 'birth' && progress < 0.72) {
+        ctx.globalAlpha = fade * 0.24;
+        ctx.strokeStyle = effect.color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(effect.x, effect.y, 8 + progress * 30, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = state.gameStatus === 'won' ? c.alien : c.fire;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(260, 290, 680, 120);
-    ctx.fillStyle = c.fg;
-    ctx.textAlign = 'center';
-    ctx.font = '500 28px sans-serif';
-    ctx.fillText(state.gameStatus === 'won' ? 'КОЛОНИЯ ЗАКРЕПИЛАСЬ' : 'КОЛОНИЯ ВЫМЕРЛА', LOGICAL_WIDTH / 2, 342);
-    ctx.fillStyle = c.muted;
-    ctx.font = '400 16px sans-serif';
-    ctx.fillText(state.gameStatus === 'won' ? 'Остров стал частью новой экосистемы' : 'Мир продолжит существовать без неё', LOGICAL_WIDTH / 2, 374);
-    ctx.textAlign = 'start';
+  }
+
+  function drawWeather() {
+    if (state.weather === 'rain') {
+      const cloudShade = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
+      cloudShade.addColorStop(0, 'rgba(13,28,38,0.24)');
+      cloudShade.addColorStop(1, 'rgba(8,24,27,0.06)');
+      ctx.fillStyle = cloudShade;
+      ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+      ctx.strokeStyle = '#b9e5ed';
+      ctx.lineWidth = 1;
+      for (let index = 0; index < 78; index += 1) {
+        const speed = 190 + visualHash(index, 80) * 150;
+        const x = (visualHash(index, 81) * LOGICAL_WIDTH + visual.time * 34) % (LOGICAL_WIDTH + 40) - 20;
+        const y = (visualHash(index, 82) * LOGICAL_HEIGHT + visual.time * speed) % (LOGICAL_HEIGHT + 50) - 25;
+        ctx.globalAlpha = 0.12 + visualHash(index, 83) * 0.2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 6, y + 16 + visualHash(index, 84) * 10);
+        ctx.stroke();
+      }
+    } else if (state.weather === 'snow') {
+      for (let index = 0; index < 68; index += 1) {
+        const speed = 18 + visualHash(index, 85) * 35;
+        const x = (visualHash(index, 86) * LOGICAL_WIDTH + Math.sin(visual.time * 0.7 + index) * 25 + LOGICAL_WIDTH) % LOGICAL_WIDTH;
+        const y = (visualHash(index, 87) * LOGICAL_HEIGHT + visual.time * speed) % (LOGICAL_HEIGHT + 20) - 10;
+        const size = 1 + visualHash(index, 88) * 2.6;
+        ctx.globalAlpha = 0.18 + visualHash(index, 89) * 0.42;
+        ctx.fillStyle = '#effffb';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawDayNightLighting() {
+    const phase = state.worldDays - Math.floor(state.worldDays);
+    const daylight = clamp((Math.sin((phase - 0.25) * Math.PI * 2) + 0.18) * 0.78, 0, 1);
+    if (daylight < 0.95) {
+      const darkness = (1 - daylight) * 0.38;
+      ctx.globalAlpha = darkness;
+      ctx.fillStyle = '#020a14';
+      ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+      ctx.globalAlpha = (1 - daylight) * 0.1;
+      const moon = ctx.createRadialGradient(LOGICAL_WIDTH * 0.72, 0, 0, LOGICAL_WIDTH * 0.72, 0, LOGICAL_HEIGHT * 0.8);
+      moon.addColorStop(0, '#8ab9d6');
+      moon.addColorStop(1, 'rgba(40,80,108,0)');
+      ctx.fillStyle = moon;
+      ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    } else {
+      ctx.globalAlpha = 0.035;
+      ctx.fillStyle = '#fff0ba';
+      ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawEndState() {
+    if (state.gameStatus === 'playing') return;
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#020a0c';
+    ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    ctx.globalAlpha = 1;
   }
 
   function draw() {
     if (!view.width || !view.height) return;
     const c = colors();
     ctx.setTransform(view.dpr * view.width / LOGICAL_WIDTH, 0, 0, view.dpr * view.height / LOGICAL_HEIGHT, 0, 0);
-    drawTerrain(c);
-    drawFires(c);
-    for (const entity of state.entities) drawEntity(entity, c);
-    if (!isDaytime()) {
-      ctx.globalAlpha = 0.13;
-      ctx.fillStyle = c.bg;
-      ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
-      ctx.globalAlpha = 1;
-    }
-    drawEndState(c);
+    ctx.imageSmoothingEnabled = true;
+    drawTerrain();
+    drawDayNightLighting();
+    drawFires();
+    const sortedEntities = [...state.entities].sort((left, right) => left.y - right.y);
+    for (const entity of sortedEntities) drawEntity(entity, c);
+    drawVisualEffects();
+    drawWeather();
+    drawEndState();
   }
 
   function canvasPoint(event) {
@@ -2562,6 +3534,7 @@
     state.draftGenome = cloneGenome(genomeTemplates.balanced);
     templateSelect.value = 'balanced';
     buildTerrain();
+    resetVisualField();
     createInitialWorld();
     updateConstructorUI();
     setMode('god');
@@ -2642,6 +3615,24 @@
     logToggle.textContent = logPanel.hidden ? 'Показать журнал' : 'Свернуть журнал';
   });
   canvas.addEventListener('pointerdown', handleCanvas);
+  canvas.addEventListener('pointermove', (event) => {
+    const point = canvasPoint(event);
+    let nearest = null;
+    let nearestDistance = 34;
+    for (const candidate of state.entities) {
+      const candidateDistance = distance(candidate, point);
+      if (candidateDistance < nearestDistance) {
+        nearest = candidate;
+        nearestDistance = candidateDistance;
+      }
+    }
+    visual.hoverId = nearest ? nearest.id : null;
+    canvas.style.cursor = state.deployArmed ? 'copy' : nearest ? 'pointer' : 'crosshair';
+  });
+  canvas.addEventListener('pointerleave', () => {
+    visual.hoverId = null;
+    canvas.style.cursor = state.deployArmed ? 'copy' : 'crosshair';
+  });
   window.addEventListener('resize', resizeCanvas);
 
   window.addEventListener('keydown', (event) => {
@@ -2676,6 +3667,7 @@
 
   buildTerrain();
   load();
+  resetVisualField();
   updateConstructorUI();
   setMode(state.mode);
   renderLog();
@@ -2687,6 +3679,7 @@
   function frame(now) {
     const seconds = Math.min(0.12, Math.max(0, (now - lastFrame) / 1000));
     lastFrame = now;
+    updateVisualEffects(seconds);
     step(seconds * LIVE_RATE * speeds[state.speedIndex]);
     saveTimer += seconds;
     hudTimer += seconds;
