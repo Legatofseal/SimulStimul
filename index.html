@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Amoebas — статический прототип симулятора жизни и эволюции.">
+  <meta name="description" content="Amoebas — трёхмерный симулятор жизни, эволюции и вторжения в чужую экосистему.">
   <meta name="theme-color" content="#0b1115">
   <title>Amoebas — симулятор эволюции</title>
   <style>
@@ -98,9 +98,9 @@
 <section id="welcome-screen" class="welcome-screen" aria-labelledby="welcome-title">
   <div class="welcome-shell">
     <div>
-      <div class="welcome-kicker">Amoebas · живая система</div>
-      <h1 id="welcome-title" class="welcome-title">Посади организм.<br><span>Проверь, выживет ли он.</span></h1>
-      <p class="welcome-intro">Ты управляешь инопланетной колонией, которая должна освоить чужую экосистему. Создавай виды, высаживай их на остров и наблюдай, как решения превращаются в эволюцию.</p>
+      <div class="welcome-kicker">Amoebas · живой 3D-аквариум</div>
+      <h1 id="welcome-title" class="welcome-title">Создай организм.<br><span>Выпусти его в глубину.</span></h1>
+      <p class="welcome-intro">Ты управляешь инопланетной колонией, которая должна освоить чужую водную экосистему. Создавай виды, выпускай их в аквариум и наблюдай, как решения превращаются в эволюцию.</p>
       <div class="welcome-actions">
         <button type="button" id="welcome-start" class="btn btn-primary">Начать экспедицию</button>
         <span id="welcome-note" class="welcome-note text-small">Мир сохраняется в этом браузере</span>
@@ -113,7 +113,7 @@
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">02</span>
-        <div><div class="welcome-rule-title">Высаживайся на карту</div><p>Открой конструктор, собери организм, нажми «Высадить на карту» и выбери клетку суши.</p></div>
+        <div><div class="welcome-rule-title">Выпускай в аквариум</div><p>Открой конструктор, собери организм, нажми «Выпустить в аквариум» и выбери место на дне.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">03</span>
@@ -125,11 +125,11 @@
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">05</span>
-        <div><div class="welcome-rule-title">Выбери путь к победе</div><p>Удерживай 35% территории семь дней или переживи год. Мир продолжает развиваться, пока тебя нет.</p></div>
+        <div><div class="welcome-rule-title">Выбери путь к победе</div><p>Удерживай 35% объёма аквариума семь дней или переживи год. Мир продолжает развиваться, пока тебя нет.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">06</span>
-        <div><div class="welcome-rule-title">Вмешивайся вручную</div><p>В режиме существа управляй пришельцем. В режиме бога осматривай клетки, а Shift+клик запускает пожар.</p></div>
+        <div><div class="welcome-rule-title">Вмешивайся вручную</div><p>Вращай камеру мышью или пальцем. В режиме существа управляй пришельцем по горизонтали и глубине; Shift+клик создаёт терморазряд.</p></div>
       </div>
     </div>
   </div>
@@ -137,7 +137,7 @@
 <section id="game-screen" hidden>
 <div id="ecosystem-game-prototype">
   <div class="eco-topline viz-row">
-    <span class="eco-kicker">КОЛОНИЯ · ОСТРОВ 01</span>
+    <span class="eco-kicker">КОЛОНИЯ · АКВАРИУМ 01</span>
     <span id="eco-clock" class="text-small text-muted">День 1168 · 12:00</span>
   </div>
 
@@ -148,9 +148,9 @@
       <div id="eco-population-context" class="text-small text-muted">пришельцев</div>
     </div>
     <div class="card viz-stat">
-      <div class="text-muted">Территория</div>
+      <div class="text-muted">Объём</div>
       <div id="eco-territory" class="viz-stat-value">0%</div>
-      <div class="text-small text-muted">цель: 35%</div>
+      <div class="text-small text-muted">контроль воды: 35%</div>
     </div>
     <div class="card viz-stat">
       <div class="text-muted">Энергия</div>
@@ -165,7 +165,7 @@
       <option value="conquest">Завоевание</option>
       <option value="survival">Выживание</option>
     </select>
-    <span id="eco-objective-text">Закрепиться на острове и занять 35% суши</span>
+    <span id="eco-objective-text">Закрепиться в аквариуме и занять 35% объёма</span>
     <span id="eco-objective-progress" class="text-small text-muted">0 / 35%</span>
     <span id="eco-budget" class="viz-badge">Очки: 360</span>
   </div>
@@ -211,7 +211,7 @@
           <option value="solar">Фотосинтез</option>
         </select>
         <span id="eco-genome-cost" class="viz-badge">Стоимость: 0</span>
-        <button type="button" id="eco-deploy-genome" class="btn btn-primary">Высадить на карту</button>
+        <button type="button" id="eco-deploy-genome" class="btn btn-primary">Выпустить в аквариум</button>
         <button type="button" id="eco-apply-genome" class="btn btn-ghost">Применить к колонии</button>
       </div>
       <div id="eco-derived-stats" class="eco-derived-stats text-small"></div>
@@ -221,12 +221,13 @@
 
   <div class="eco-world-layout">
     <div class="eco-map-wrap">
-      <canvas id="eco-map" role="img" aria-label="Карта острова с биомами, организмами и пожарами"></canvas>
+      <canvas id="eco-map" role="img" aria-label="Трёхмерный аквариум с организмами и подводными биомами"></canvas>
+      <div id="eco-3d-loading" class="eco-3d-loading" role="status">Наполняем аквариум…</div>
       <div class="eco-lens-overlay" aria-hidden="true">
-        <span class="eco-lens-index">БИОСФЕРА · 01</span>
+        <span class="eco-lens-index">АКВАРИУМ · 01</span>
         <span class="eco-lens-scale"><i></i> 120 мкм</span>
       </div>
-      <span id="eco-map-hint" class="viz-badge eco-map-hint">Бог: нажмите на клетку для статистики, Shift+клик — пожар</span>
+      <span id="eco-map-hint" class="viz-badge eco-map-hint">Тяните для вращения · колесо — масштаб · Shift+клик — терморазряд</span>
       <span id="eco-weather-badge" class="viz-badge eco-weather-badge">☀ Ясно</span>
       <div id="eco-end-screen" class="eco-end-screen card" hidden role="dialog" aria-labelledby="eco-result-title">
         <div id="eco-result-kicker" class="eco-result-kicker">Эксперимент завершён</div>
@@ -247,6 +248,11 @@
       <button type="button" class="btn btn-primary" data-eco-mode="god" aria-pressed="true">Режим бога</button>
       <button type="button" class="btn btn-ghost" data-eco-mode="creature" aria-pressed="false">Войти в организм</button>
     </div>
+    <div class="eco-depth-group" role="group" aria-label="Управление глубиной и камерой">
+      <button type="button" id="eco-dive" class="btn btn-ghost" disabled>Нырнуть</button>
+      <button type="button" id="eco-rise" class="btn btn-ghost" disabled>Всплыть</button>
+      <button type="button" id="eco-camera-reset" class="btn btn-ghost">Общий вид</button>
+    </div>
     <button type="button" id="eco-speed" class="btn btn-ghost">Скорость 1×</button>
   </div>
 
@@ -264,12 +270,12 @@
   </div>
 
   <div class="eco-status viz-row">
-    <span id="eco-status">Колония высажена. Найдите пищу и закрепитесь на острове.</span>
+    <span id="eco-status">Аквариум стабилен. Создайте организм и начните вторжение.</span>
     <span class="eco-legend text-small" aria-label="Легенда">
       <span><i class="eco-dot eco-dot-alien" aria-hidden="true"></i>колония</span>
       <span><i class="eco-dot eco-dot-grazer" aria-hidden="true"></i>травоядные</span>
       <span><i class="eco-dot eco-dot-predator" aria-hidden="true"></i>хищники</span>
-      <span><i class="eco-dot eco-dot-fire" aria-hidden="true"></i>пожар</span>
+      <span><i class="eco-dot eco-dot-fire" aria-hidden="true"></i>терморазряд</span>
     </span>
   </div>
 </div>
@@ -473,7 +479,8 @@
 #ecosystem-game-prototype #eco-map {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
+  min-height: 31rem;
   background: var(--background);
   touch-action: none;
 }
@@ -541,6 +548,13 @@
 #ecosystem-game-prototype .eco-mode-group {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+#ecosystem-game-prototype .eco-depth-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
 }
 
@@ -991,7 +1005,36 @@ body::before {
   position: relative;
   z-index: 0;
   background: #071619;
-  cursor: crosshair;
+  cursor: grab;
+}
+
+#ecosystem-game-prototype #eco-map:active {
+  cursor: grabbing;
+}
+
+#ecosystem-game-prototype .eco-3d-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(95, 218, 196, 0.14), transparent 26rem),
+    #05151b;
+  color: #b8eadb;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: opacity 350ms ease;
+}
+
+#ecosystem-game-prototype .eco-3d-loading.is-ready {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#ecosystem-game-prototype .eco-3d-loading[hidden] {
+  display: none !important;
 }
 
 #ecosystem-game-prototype .eco-map-wrap::after {
@@ -1111,11 +1154,21 @@ body::before {
 
 @media (max-width: 800px) {
   .welcome-screen {
+    min-height: auto;
+    overflow: visible;
     background-position: 60% center;
   }
 
   .welcome-shell {
     width: min(100% - 1.5rem, 680px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.25rem 0;
+  }
+
+  .welcome-title {
+    font-size: clamp(2.7rem, 13vw, 4.4rem);
+    line-height: 0.94;
   }
 
   #ecosystem-game-prototype .eco-world-layout {
@@ -1126,6 +1179,48 @@ body::before {
     position: static;
     max-height: none;
     min-height: 12rem;
+  }
+
+  #ecosystem-game-prototype #eco-map {
+    min-height: 24rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .welcome-shell {
+    width: min(100% - 1rem, 680px);
+  }
+
+  .welcome-rules {
+    padding: 0.75rem 0.9rem;
+  }
+
+  #ecosystem-game-prototype .eco-hud {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  #ecosystem-game-prototype .eco-hud .card {
+    padding: 0.55rem 0.48rem;
+  }
+
+  #ecosystem-game-prototype .eco-hud .viz-stat-value {
+    font-size: 1.45rem;
+  }
+
+  #ecosystem-game-prototype .eco-hud .text-small {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+
+  #ecosystem-game-prototype #eco-map {
+    min-height: 21rem;
+    aspect-ratio: 4 / 3;
+  }
+
+  #ecosystem-game-prototype .eco-map-hint {
+    max-width: calc(100% - 1.3rem);
+    white-space: normal;
   }
 }
 
@@ -1138,12 +1233,38 @@ body::before {
 </style>
 
 <script>
+window.__amoebasBootErrors = [];
+window.addEventListener('error', (event) => {
+  const message = event.message || (event.error && event.error.message) || 'Неизвестная ошибка загрузки';
+  window.__amoebasBootErrors.push(String(message));
+  const loading = document.getElementById('eco-3d-loading');
+  if (loading) loading.textContent = 'Ошибка 3D: ' + message;
+});
+window.addEventListener('unhandledrejection', (event) => {
+  const message = event.reason && event.reason.message ? event.reason.message : String(event.reason || 'Неизвестная ошибка');
+  window.__amoebasBootErrors.push(message);
+  const loading = document.getElementById('eco-3d-loading');
+  if (loading) loading.textContent = 'Ошибка 3D: ' + message;
+});
+</script>
+<script type="module">
+let Aquarium3D;
+try {
+  ({ Aquarium3D } = await import("./src/aquarium3d.js?v=5-3d-2"));
+} catch (error) {
+  const message = error && error.message ? error.message : String(error);
+  window.__amoebasBootErrors.push(message);
+  const loading = document.getElementById('eco-3d-loading');
+  if (loading) loading.textContent = 'Ошибка 3D: ' + message;
+  throw error;
+}
+
 (() => {
   const root = document.getElementById('ecosystem-game-prototype');
   if (!root) return;
 
   const canvas = document.getElementById('eco-map');
-  const ctx = canvas.getContext('2d');
+  const ctx = null;
   const clock = document.getElementById('eco-clock');
   const population = document.getElementById('eco-population');
   const populationContext = document.getElementById('eco-population-context');
@@ -1180,6 +1301,10 @@ body::before {
   const resultText = document.getElementById('eco-result-text');
   const resultStats = document.getElementById('eco-result-stats');
   const newExperimentButton = document.getElementById('eco-new-experiment');
+  const diveButton = document.getElementById('eco-dive');
+  const riseButton = document.getElementById('eco-rise');
+  const cameraResetButton = document.getElementById('eco-camera-reset');
+  const loading3d = document.getElementById('eco-3d-loading');
   const modeButtons = [...root.querySelectorAll('[data-eco-mode]')];
   const geneNames = ['strength', 'agility', 'constitution', 'intelligence', 'size', 'armor', 'camouflage'];
   const geneInputs = Object.fromEntries(geneNames.map((name) => [name, document.getElementById('eco-gene-' + name)]));
@@ -1188,6 +1313,7 @@ body::before {
 
   const LOGICAL_WIDTH = 1200;
   const LOGICAL_HEIGHT = 750;
+  const AQUARIUM_HEIGHT = 420;
   const TERRAIN_COLS = 50;
   const TERRAIN_ROWS = 31;
   const LIVE_RATE = 0.015;
@@ -1195,7 +1321,7 @@ body::before {
   const CONQUEST_HOLD_DAYS = 7;
   const SURVIVAL_DAYS = 365;
   const MUTATION_FACTOR = 0.10;
-  const STORAGE_KEY = 'amoebas-ecosystem-game-v4';
+  const STORAGE_KEY = 'amoebas-ecosystem-game-v5-3d';
   const STARTING_POINTS = 360;
   const speeds = [1, 4, 12];
 
@@ -1350,6 +1476,20 @@ body::before {
     }
   };
 
+  let aquarium3d = null;
+  try {
+    aquarium3d = new Aquarium3D(canvas, {
+      simWidth: LOGICAL_WIDTH,
+      simDepth: LOGICAL_HEIGHT,
+      simHeight: AQUARIUM_HEIGHT,
+      terrainCols: TERRAIN_COLS,
+      terrainRows: TERRAIN_ROWS
+    });
+  } catch (error) {
+    console.error('Не удалось запустить 3D-аквариум:', error);
+    if (loading3d) loading3d.textContent = 'WebGL недоступен в этом браузере';
+  }
+
   function token(name) {
     return getComputedStyle(root).getPropertyValue(name).trim();
   }
@@ -1396,9 +1536,10 @@ body::before {
       phase: visualHash(index, 5) * Math.PI * 2
     }));
     visual.terrainDirty = true;
+    if (aquarium3d) aquarium3d.clearEffects();
   }
 
-  function emitVisualEffect(type, x, y, color, amount) {
+  function emitVisualEffect(type, x, y, color, amount, z) {
     const count = Math.max(1, amount || 1);
     for (let index = 0; index < count; index += 1) {
       const phase = visual.time * 3.7 + index * 2.399;
@@ -1415,6 +1556,7 @@ body::before {
       });
     }
     if (visual.effects.length > 180) visual.effects.splice(0, visual.effects.length - 180);
+    if (aquarium3d) aquarium3d.emit(type, x, y, Number.isFinite(z) ? z : 24, color || '#d8ffe5', count);
   }
 
   function updateVisualEffects(seconds) {
@@ -1532,7 +1674,11 @@ body::before {
   }
 
   function distance(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
+    return Math.hypot(
+      a.x - b.x,
+      a.y - b.y,
+      (Number(a.z) || 0) - (Number(b.z) || 0)
+    );
   }
 
   function terrainHash(x, y) {
@@ -1582,6 +1728,7 @@ body::before {
         if (type !== 'water') landCells.push(cell);
       }
     }
+    if (aquarium3d) aquarium3d.rebuildEnvironment(terrain);
   }
 
   function getCellAt(x, y) {
@@ -1592,9 +1739,26 @@ body::before {
 
   function isHabitable(kind, x, y) {
     const type = terrainTypeAt(x, y);
-    if (type === 'water') return false;
     if (kind === 'grazer') return type !== 'rock' && type !== 'desert';
     return true;
+  }
+
+  function defaultLayer(kind, diet) {
+    if (kind === 'grazer') return 38 + random() * 82;
+    if (kind === 'predator') return 105 + random() * 215;
+    if (diet === 'solar') return 300 + random() * 82;
+    if (diet === 'herbivore') return 45 + random() * 105;
+    return 95 + random() * 205;
+  }
+
+  function preferredLayer(entity, action, target) {
+    if (target && Number.isFinite(Number(target.z))) return clamp(Number(target.z), 12, AQUARIUM_HEIGHT - 12);
+    if (action === 'forage' || action === 'reproduce') return 26 + entity.traits.size * 12;
+    if (action === 'solar') return AQUARIUM_HEIGHT - 34;
+    if (entity.kind === 'grazer') return 68;
+    if (entity.kind === 'predator') return 210;
+    if (entity.diet === 'solar') return AQUARIUM_HEIGHT - 42;
+    return 165;
   }
 
   function dietRules(entity) {
@@ -1701,22 +1865,30 @@ body::before {
     return prefix + '-' + String(id).padStart(2, '0');
   }
 
-  function spawn(kind, x, y, parent, genesOverride, dietOverride) {
-    if (state.entities.length >= 210 || !isHabitable(kind, x, y)) return null;
+  function spawn(kind, x, y, parent, genesOverride, dietOverride, heightOverride) {
+    if (state.entities.length >= 150 || !isHabitable(kind, x, y)) return null;
     const base = archetypes[kind];
     const traits = mutateTraits(kind, parent, genesOverride);
     const coat = inheritedCoat(kind, parent, genesOverride);
     const abilities = inheritedAbilities(kind, parent, genesOverride);
+    const diet = dietOverride || (parent ? parent.diet : kind === 'alien' ? state.genome.diet : 'native');
+    const spawnHeight = Number.isFinite(Number(heightOverride))
+      ? Number(heightOverride)
+      : parent
+        ? (Number(parent.z) || defaultLayer(kind, diet)) + (random() - 0.5) * 24
+        : defaultLayer(kind, diet);
     const entity = {
       id: state.nextId++,
       kind,
       name: entityName(kind, state.nextId - 1),
       x: clamp(x, 18, LOGICAL_WIDTH - 18),
       y: clamp(y, 18, LOGICAL_HEIGHT - 18),
+      z: clamp(spawnHeight, 12, AQUARIUM_HEIGHT - 12),
       targetX: clamp(x + (random() - 0.5) * 100, 18, LOGICAL_WIDTH - 18),
       targetY: clamp(y + (random() - 0.5) * 100, 18, LOGICAL_HEIGHT - 18),
+      targetZ: clamp(spawnHeight + (random() - 0.5) * 70, 12, AQUARIUM_HEIGHT - 12),
       traits,
-      diet: dietOverride || (parent ? parent.diet : kind === 'alien' ? state.genome.diet : 'native'),
+      diet,
       coat,
       displayCoat: { ...coat },
       abilities,
@@ -1733,6 +1905,7 @@ body::before {
       visualSeed: random(),
       vx: 0,
       vy: 0,
+      vz: 0,
       hitFlash: 0,
       manualUntil: 0,
       stateLabel: 'исследует',
@@ -1876,8 +2049,11 @@ body::before {
       entity.heading = Number.isFinite(entity.heading) ? entity.heading : visualHash(entity.id, 31) * Math.PI * 2;
       entity.visualPhase = Number.isFinite(entity.visualPhase) ? entity.visualPhase : visualHash(entity.id, 32) * Math.PI * 2;
       entity.visualSeed = Number.isFinite(entity.visualSeed) ? entity.visualSeed : visualHash(entity.id, 33);
+      entity.z = clamp(Number.isFinite(Number(entity.z)) ? Number(entity.z) : defaultLayer(entity.kind, entity.diet), 12, AQUARIUM_HEIGHT - 12);
+      entity.targetZ = clamp(Number.isFinite(Number(entity.targetZ)) ? Number(entity.targetZ) : entity.z, 12, AQUARIUM_HEIGHT - 12);
       entity.vx = 0;
       entity.vy = 0;
+      entity.vz = 0;
       entity.hitFlash = 0;
     });
     state.fires = Array.isArray(saved.fires) ? saved.fires : [];
@@ -1910,20 +2086,37 @@ body::before {
 
   function computeTerritory() {
     if (!state.entities.length) return 0;
-    let occupied = 0;
-    for (const cell of landCells) {
-      let alienMass = 0;
-      let nativeMass = 0;
-      for (const entity of state.entities) {
-        if (distance(entity, cell) >= 72) continue;
-        const healthRatio = clamp(entity.health / Math.max(1, entity.traits.maxHealth), 0, 1);
-        const mass = archetypes[entity.kind].baseSize * entity.traits.size * healthRatio;
-        if (entity.kind === 'alien') alienMass += mass;
-        else nativeMass += mass;
+    const columns = 10;
+    const rows = 6;
+    const layers = 4;
+    let controlled = 0;
+    for (let layer = 0; layer < layers; layer += 1) {
+      for (let row = 0; row < rows; row += 1) {
+        for (let column = 0; column < columns; column += 1) {
+          const voxel = {
+            x: (column + 0.5) / columns * LOGICAL_WIDTH,
+            y: (row + 0.5) / rows * LOGICAL_HEIGHT,
+            z: (layer + 0.5) / layers * AQUARIUM_HEIGHT
+          };
+          let alienMass = 0;
+          let nativeMass = 0;
+          for (const entity of state.entities) {
+            const influenceDistance = Math.hypot(
+              (entity.x - voxel.x) / 175,
+              (entity.y - voxel.y) / 150,
+              ((Number(entity.z) || 0) - voxel.z) / 125
+            );
+            if (influenceDistance >= 1) continue;
+            const healthRatio = clamp(entity.health / Math.max(1, entity.traits.maxHealth), 0, 1);
+            const mass = archetypes[entity.kind].baseSize * entity.traits.size * healthRatio * (1 - influenceDistance);
+            if (entity.kind === 'alien') alienMass += mass;
+            else nativeMass += mass;
+          }
+          if (alienMass >= 0.22 && alienMass > nativeMass * 0.86) controlled += 1;
+        }
       }
-      if (alienMass >= 1.5 && alienMass > nativeMass * 1.05) occupied += 1;
     }
-    return Math.round(occupied / Math.max(1, landCells.length) * 100);
+    return Math.round(controlled / (columns * rows * layers) * 100);
   }
 
   function averageAlienEnergy() {
@@ -1951,7 +2144,7 @@ body::before {
     if (roll < 0.2) state.weather = 'rain';
     else if (roll < 0.27) state.weather = 'snow';
     else state.weather = 'clear';
-    if (state.weather !== 'clear') addEvent(state.weather === 'rain' ? 'На остров пришёл дождь.' : 'На севере начался снегопад.', 'weather');
+    if (state.weather !== 'clear') addEvent(state.weather === 'rain' ? 'Дождь охладил верхние слои аквариума.' : 'У поверхности началось переохлаждение.', 'weather');
   }
 
   function regrowFood(dt) {
@@ -1969,7 +2162,7 @@ body::before {
   }
 
   function coatMatch(entity, cell) {
-    const target = terrainAppearance[cell && cell.type] || terrainAppearance.meadow;
+    const target = appearanceAt(entity, cell);
     const coat = normalizeCoat(entity.displayCoat || entity.coat, target);
     const hueMatch = 1 - hueDistance(coat.hue, target.hue) / 180;
     const saturationMatch = 1 - Math.abs(coat.saturation - target.saturation) / 100;
@@ -2096,10 +2289,18 @@ body::before {
   function setEscapeTarget(entity, danger, reason) {
     const dx = entity.x - danger.x;
     const dy = entity.y - danger.y;
-    const length = Math.hypot(dx, dy) || 1;
+    const dz = (Number(entity.z) || 0) - (Number(danger.z) || 24);
+    const length = Math.hypot(dx, dy, dz) || 1;
     entity.targetX = clamp(entity.x + dx / length * 190, 18, LOGICAL_WIDTH - 18);
     entity.targetY = clamp(entity.y + dy / length * 190, 18, LOGICAL_HEIGHT - 18);
+    entity.targetZ = clamp((Number(entity.z) || 0) + dz / length * 145 + (random() - 0.5) * 36, 12, AQUARIUM_HEIGHT - 12);
     setDecision(entity, 'flee', reason, 1, danger);
+  }
+
+  function setMovementTarget(entity, target, action) {
+    entity.targetX = clamp(Number(target && target.x) || entity.x, 18, LOGICAL_WIDTH - 18);
+    entity.targetY = clamp(Number(target && target.y) || entity.y, 18, LOGICAL_HEIGHT - 18);
+    entity.targetZ = preferredLayer(entity, action, target);
   }
 
   function decisionLabel(action, target) {
@@ -2138,17 +2339,23 @@ body::before {
       const radius = 65 + random() * (150 + brain.factors.length * 12);
       const candidate = {
         x: clamp(entity.x + Math.cos(angle) * radius, 18, LOGICAL_WIDTH - 18),
-        y: clamp(entity.y + Math.sin(angle) * radius, 18, LOGICAL_HEIGHT - 18)
+        y: clamp(entity.y + Math.sin(angle) * radius, 18, LOGICAL_HEIGHT - 18),
+        z: clamp(
+          (Number(entity.z) || preferredLayer(entity, 'explore')) + (random() - 0.5) * (95 + brain.factors.length * 8),
+          18,
+          AQUARIUM_HEIGHT - 18
+        )
       };
       if (!isHabitable(entity.kind, candidate.x, candidate.y)) continue;
       const cell = getCellAt(candidate.x, candidate.y);
-      const score = brain.factors.length >= 8 ? terrainSpeed(cell.type) + cell.food / 120 : random();
+      const verticalPreference = 1 - Math.abs(candidate.z - preferredLayer(entity, 'explore')) / AQUARIUM_HEIGHT;
+      const score = brain.factors.length >= 8 ? terrainSpeed(cell.type) + cell.food / 120 + verticalPreference * 0.45 : random();
       if (score > bestScore) {
         bestScore = score;
         best = candidate;
       }
     }
-    return best || { x: entity.x, y: entity.y };
+    return best || { x: entity.x, y: entity.y, z: preferredLayer(entity, 'explore') };
   }
 
   function chooseAutonomousTarget(entity) {
@@ -2156,7 +2363,7 @@ body::before {
     const brain = brainProfile(entity.traits.intelligence);
     const fire = nearestFireDanger(entity);
     if (fire) {
-      setEscapeTarget(entity, fire, 'огонь уже в зоне восприятия');
+      setEscapeTarget(entity, fire, 'терморазряд уже в зоне восприятия');
       return;
     }
 
@@ -2170,8 +2377,7 @@ body::before {
     if (hungry && dietRules(entity).canEatGrass) {
       const food = nearestFoodTarget(entity);
       if (food) {
-        entity.targetX = food.x;
-        entity.targetY = food.y;
+        setMovementTarget(entity, food, 'forage');
         setDecision(entity, 'forage', 'энергия ' + Math.round(energyRatio * 100) + '%, найден участок с пищей ' + Math.round(food.food), 2, food);
         return;
       }
@@ -2180,8 +2386,7 @@ body::before {
     if (hungry && dietRules(entity).canSolar) {
       const sun = nearestSunTarget(entity);
       if (sun) {
-        entity.targetX = sun.x;
-        entity.targetY = sun.y;
+        setMovementTarget(entity, sun, 'solar');
         setDecision(entity, 'solar', 'энергия ' + Math.round(energyRatio * 100) + '%, нужен открытый свет', 2, sun);
         return;
       }
@@ -2190,8 +2395,7 @@ body::before {
     if ((hungry || brain.riskAwareness > 0.55) && dietRules(entity).canHunt) {
       const prey = nearestPrey(entity);
       if (prey) {
-        entity.targetX = prey.x;
-        entity.targetY = prey.y;
+        setMovementTarget(entity, prey, 'hunt');
         const weakness = combatPower(entity) / Math.max(1, combatPower(prey));
         const reason = brain.riskAwareness > 0.45 ? 'энергия ' + Math.round(energyRatio * 100) + '%, оценка силы цели ' + weakness.toFixed(1) + '×' : 'добыча ближе остальных';
         setDecision(entity, 'hunt', reason, 3, prey);
@@ -2200,25 +2404,35 @@ body::before {
     }
 
     if (reproductionReady(entity, threat)) {
-      entity.targetX = entity.x;
-      entity.targetY = entity.y;
+      setMovementTarget(entity, entity, 'reproduce');
       setDecision(entity, 'reproduce', 'энергии достаточно, рядом нет явной угрозы', 4, null);
       return;
     }
 
     const destination = chooseExplorationTarget(entity);
-    entity.targetX = destination.x;
-    entity.targetY = destination.y;
+    setMovementTarget(entity, destination, 'explore');
     setDecision(entity, 'explore', brain.factors.length >= 8 ? 'выбрана выгодная по биому и ресурсам область' : 'нет более срочной потребности', 6, null);
   }
 
   function terrainSpeed(type) {
-    return { meadow: 1, forest: 0.72, wetland: 0.62, rock: 0.48, desert: 1.08, snow: 0.58, water: 0 }[type] || 1;
+    return { meadow: 1, forest: 0.72, wetland: 0.62, rock: 0.48, desert: 1.08, snow: 0.58, water: 0.82 }[type] || 1;
+  }
+
+  function appearanceAt(entity, cell) {
+    const height = clamp((Number(entity.z) || 0) / AQUARIUM_HEIGHT, 0, 1);
+    if (height > 0.18) {
+      return {
+        hue: 187 + height * 14,
+        saturation: 34 + height * 10,
+        lightness: 24 + height * 24
+      };
+    }
+    return terrainAppearance[cell && cell.type] || terrainAppearance.meadow;
   }
 
   function consumeGrass(entity, dt) {
     const cell = getCellAt(entity.x, entity.y);
-    if (!cell || !dietRules(entity).canEatGrass || cell.food < 1 || entity.energy > entity.traits.maxEnergy * 0.96) return;
+    if (!cell || (Number(entity.z) || 0) > 72 || !dietRules(entity).canEatGrass || cell.food < 1 || entity.energy > entity.traits.maxEnergy * 0.96) return;
     const bite = Math.min(cell.food, (15 + entity.traits.size * 3) * dt);
     cell.food -= bite;
     entity.energy = clamp(entity.energy + bite * entity.traits.efficiency, 0, entity.traits.maxEnergy);
@@ -2228,15 +2442,17 @@ body::before {
   function solarGain(entity, dt) {
     if (!dietRules(entity).canSolar || entity.energy > entity.traits.maxEnergy * 0.93) return;
     const cell = getCellAt(entity.x, entity.y);
-    if (!cell || cell.type === 'forest' || cell.type === 'water') return;
-    const gain = (0.68 * sunlight() * (state.weather === 'rain' ? 0.55 : 1)) * dt;
+    if (!cell) return;
+    const heightFactor = 0.18 + clamp((Number(entity.z) || 0) / AQUARIUM_HEIGHT, 0, 1) * 0.92;
+    const coverFactor = cell.type === 'forest' && (Number(entity.z) || 0) < 130 ? 0.48 : 1;
+    const gain = (0.68 * sunlight() * heightFactor * coverFactor * (state.weather === 'rain' ? 0.72 : 1)) * dt;
     entity.energy = clamp(entity.energy + gain * entity.traits.efficiency, 0, entity.traits.maxEnergy);
     if (gain > 0.2) entity.stateLabel = 'поглощает свет';
   }
 
   function updateAbilityEffects(entity, dt) {
     const cell = getCellAt(entity.x, entity.y);
-    const targetCoat = terrainAppearance[cell && cell.type] || terrainAppearance.meadow;
+    const targetCoat = appearanceAt(entity, cell);
     const baseCoat = normalizeCoat(entity.coat, archetypes[entity.kind].baseCoat);
     const display = normalizeCoat(entity.displayCoat || baseCoat, baseCoat);
     if (entity.abilities && entity.abilities.chameleon && entity.energy > entity.traits.maxEnergy * 0.12) {
@@ -2265,20 +2481,27 @@ body::before {
     const type = terrainTypeAt(entity.x, entity.y);
     const action = entity.decision && entity.decision.action;
     const sprinting = Boolean(entity.abilities && entity.abilities.sprint && (action === 'flee' || action === 'hunt') && entity.energy > entity.traits.maxEnergy * 0.2);
-    const speed = entity.traits.maxSpeed * terrainSpeed(type) * (sprinting ? 1.48 : 1);
+    const nearFloor = clamp(1 - (Number(entity.z) || 0) / 105, 0, 1);
+    const bottomDrag = 0.84 + terrainSpeed(type) * 0.16;
+    const speed = entity.traits.maxSpeed * (1 - nearFloor + nearFloor * bottomDrag) * (sprinting ? 1.48 : 1);
     const dx = entity.targetX - entity.x;
     const dy = entity.targetY - entity.y;
-    const length = Math.hypot(dx, dy) || 1;
+    const dz = (Number(entity.targetZ) || preferredLayer(entity, action)) - (Number(entity.z) || 0);
+    const length = Math.hypot(dx, dy, dz) || 1;
     const stepDistance = speed * dt;
     const moved = Math.min(stepDistance, length);
     const previousX = entity.x;
     const previousY = entity.y;
+    const previousZ = Number(entity.z) || 0;
     entity.x = clamp(entity.x + dx / length * moved, 14, LOGICAL_WIDTH - 14);
     entity.y = clamp(entity.y + dy / length * moved, 14, LOGICAL_HEIGHT - 14);
+    entity.z = clamp(previousZ + dz / length * moved, 12, AQUARIUM_HEIGHT - 12);
     const nextVx = dt > 0 ? (entity.x - previousX) / dt : 0;
     const nextVy = dt > 0 ? (entity.y - previousY) / dt : 0;
+    const nextVz = dt > 0 ? (entity.z - previousZ) / dt : 0;
     entity.vx = (Number(entity.vx) || 0) * 0.72 + nextVx * 0.28;
     entity.vy = (Number(entity.vy) || 0) * 0.72 + nextVy * 0.28;
+    entity.vz = (Number(entity.vz) || 0) * 0.72 + nextVz * 0.28;
     if (Math.hypot(entity.vx, entity.vy) > 1) {
       const desiredHeading = Math.atan2(entity.vy, entity.vx);
       let headingDelta = ((desiredHeading - (Number(entity.heading) || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
@@ -2296,6 +2519,7 @@ body::before {
       if (!target || distance(attacker, target) > archetypes[attacker.kind].attackRange) continue;
       attacker.targetX = target.x;
       attacker.targetY = target.y;
+      attacker.targetZ = target.z;
       if (attacker.attackTimer > 0 || attacker.energy < attacker.traits.attackCost) continue;
       const armorFactor = 1 - clamp(target.traits.armor - 1, -0.45, 0.72) * 0.42;
       const venomMultiplier = attacker.abilities && attacker.abilities.venom ? 1.3 : 1;
@@ -2308,7 +2532,7 @@ body::before {
       attacker.attackTimer = attacker.traits.attackCooldown;
       target.stateLabel = 'атакован';
       target.thinkTimer = 0;
-      emitVisualEffect('attack', target.x, target.y, attacker.abilities && attacker.abilities.venom ? '#b7ff65' : '#ffe7b0', 4);
+      emitVisualEffect('attack', target.x, target.y, attacker.abilities && attacker.abilities.venom ? '#b7ff65' : '#ffe7b0', 4, target.z);
       if (attacker.id === state.selectedId || !attacker.attackLogAt || state.worldDays - attacker.attackLogAt > 4) {
         addEvent(attacker.name + ' атакует ' + target.name + ' (' + Math.round(damage) + ' урона).', 'combat');
         attacker.attackLogAt = state.worldDays;
@@ -2322,7 +2546,7 @@ body::before {
         if (state.inspectedId === target.id) state.inspectedId = null;
         attacker.energy = clamp(attacker.energy + target.traits.maxEnergy * 0.34, 0, attacker.traits.maxEnergy);
         state.deaths += 1;
-        emitVisualEffect('death', target.x, target.y, target.kind === 'predator' ? '#e4a0df' : target.kind === 'alien' ? '#9af5b3' : '#91d7ed', 12);
+        emitVisualEffect('death', target.x, target.y, target.kind === 'predator' ? '#e4a0df' : target.kind === 'alien' ? '#9af5b3' : '#91d7ed', 12, target.z);
         addEvent(attacker.name + ' уничтожил ' + targetName + '.', 'death');
       }
     }
@@ -2338,7 +2562,7 @@ body::before {
       entity.reproTimer -= dt;
       entity.thinkTimer -= dt;
       const fireDanger = nearestFireDanger(entity);
-      if (fireDanger && state.worldDays >= entity.manualUntil) setEscapeTarget(entity, fireDanger, 'огонь уже слишком близко');
+      if (fireDanger && state.worldDays >= entity.manualUntil) setEscapeTarget(entity, fireDanger, 'терморазряд уже слишком близко');
       else if (entity.thinkTimer <= 0 && state.worldDays >= entity.manualUntil) {
         chooseAutonomousTarget(entity);
         entity.thinkTimer = (1.1 + random() * 2.2) / Math.max(0.55, entity.traits.intelligence);
@@ -2356,17 +2580,18 @@ body::before {
       if (fireDanger && distance(entity, fireDanger) < fireDanger.radius + 8) {
         entity.health -= (8.5 + fireDanger.radius * 0.055) * dt / entity.traits.fireResistance;
         entity.energy -= 1.6 * dt / entity.traits.fireResistance;
-        entity.stateLabel = 'горит';
+        entity.stateLabel = 'перегревается';
       }
       if (entity.age > entity.traits.maxAge) entity.health -= (0.32 + (entity.age - entity.traits.maxAge) / 260) * dt;
       if (entity.energy <= 0) entity.health -= 4.2 * dt;
       if (entity.health <= 0) {
-        const deathReason = fireDanger && distance(entity, fireDanger) < fireDanger.radius + 8 ? 'сгорел' : entity.energy <= 0 ? 'умер от истощения' : entity.age > entity.traits.maxAge ? 'умер от старости' : 'погиб в столкновении';
+        const deathReason = fireDanger && distance(entity, fireDanger) < fireDanger.radius + 8 ? 'погиб от перегрева' : entity.energy <= 0 ? 'умер от истощения' : entity.age > entity.traits.maxAge ? 'умер от старости' : 'погиб в столкновении';
         const index = state.entities.indexOf(entity);
         if (index >= 0) state.entities.splice(index, 1);
         if (state.selectedId === entity.id) state.selectedId = null;
         if (state.inspectedId === entity.id) state.inspectedId = null;
         state.deaths += 1;
+        emitVisualEffect('death', entity.x, entity.y, entity.kind === 'predator' ? '#e4a0df' : entity.kind === 'alien' ? '#9af5b3' : '#91d7ed', 10, entity.z);
         addEvent(entity.name + ' ' + deathReason + '.', 'death');
         continue;
       }
@@ -2379,7 +2604,7 @@ body::before {
           entity.reproTimer = entity.traits.reproductionCooldown / Math.max(0.55, entity.traits.fertility);
           entity.thinkTimer = 0;
           state.births += 1;
-          emitVisualEffect('birth', child.x, child.y, child.kind === 'alien' ? '#a3ffc0' : child.kind === 'grazer' ? '#a2e7f8' : '#eface8', 10);
+          emitVisualEffect('birth', child.x, child.y, child.kind === 'alien' ? '#a3ffc0' : child.kind === 'grazer' ? '#a2e7f8' : '#eface8', 10, child.z);
           if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение ' + child.generation + ': ' + child.name + ' от ' + entity.name + '. Цвет и признаки унаследованы с мутацией до 10%.', 'birth');
         }
       }
@@ -2402,13 +2627,13 @@ body::before {
 
   function ignite(x, y) {
     const cell = getCellAt(x, y);
-    if (!cell || cell.type === 'water') {
-      addEvent('Вода не поддерживает огонь.');
+    if (!cell) {
+      addEvent('Терморазряд здесь невозможен.');
       return;
     }
     const initialFuel = fuelAround(x, y, 40);
     if (initialFuel < 8) {
-      addEvent('Здесь почти нечему гореть.');
+      addEvent('Здесь почти нет органики для терморазряда.');
       return;
     }
     if (state.fires.some((fire) => distance(fire, { x, y }) < 46)) return;
@@ -2417,6 +2642,7 @@ body::before {
     state.fires.push({
       x,
       y,
+      z: 24,
       radius: 28 + random() * 12,
       age: 0,
       fuel: initialFuel,
@@ -2424,8 +2650,8 @@ body::before {
       spreadTimer: 1.4 + random() * 1.4,
       phase: random() * 6
     });
-    emitVisualEffect('fire', x, y, '#ff9b5d', 16);
-    addEvent('Игрок поджёг ' + cell.type + '.', 'fire');
+    emitVisualEffect('fire', x, y, '#ff9b5d', 16, 24);
+    addEvent('Игрок создал терморазряд над биомом «' + cell.type + '».', 'fire');
   }
 
   function updateFires(dt) {
@@ -2479,11 +2705,11 @@ body::before {
       }
     }
     state.fires.push(...newFires);
-    if (newFires.length) addEvent('Пожар перекинулся на ' + newFires.length + ' соседний участок.', 'fire');
+    if (newFires.length) addEvent('Тепловой фронт перешёл на ' + newFires.length + ' соседний участок.', 'fire');
     const fuelEnded = endedFires.filter((fire) => fire.endReason === 'fuel').length;
     const rainEnded = endedFires.filter((fire) => fire.endReason === 'rain').length;
-    if (fuelEnded) addEvent(fuelEnded === 1 ? 'Пожар потух: трава выгорела.' : fuelEnded + ' очага потухли: топливо закончилось.', 'fire');
-    if (rainEnded) addEvent(rainEnded === 1 ? 'Пожар потух под дождём.' : rainEnded + ' очага потухли под дождём.', 'fire');
+    if (fuelEnded) addEvent(fuelEnded === 1 ? 'Терморазряд угас: органика уничтожена.' : fuelEnded + ' терморазряда угасли: органика закончилась.', 'fire');
+    if (rainEnded) addEvent(rainEnded === 1 ? 'Терморазряд остыл под дождём.' : rainEnded + ' терморазряда остыли под дождём.', 'fire');
     state.fires = state.fires.filter((fire) => !fire.endReason);
   }
 
@@ -2512,7 +2738,7 @@ body::before {
     const currentTerritory = computeTerritory();
     if (state.gameStatus !== 'playing') return;
     if (counts.alien === 0 && state.deployedCount > 0) {
-      finishGame('lost', 'Колония вымерла: на острове не осталось ни одного пришельца.');
+      finishGame('lost', 'Колония вымерла: в аквариуме не осталось ни одного пришельца.');
       return;
     }
     if (state.goal === 'survival' && counts.alien > 0 && state.worldDays - state.goalStartDay >= SURVIVAL_DAYS) {
@@ -2522,7 +2748,7 @@ body::before {
     if (state.goal === 'conquest') {
       if (currentTerritory >= TARGET_TERRITORY && counts.alien > 0) state.conquestHoldDays += dt;
       else state.conquestHoldDays = Math.max(0, state.conquestHoldDays - dt * 1.5);
-      if (state.conquestHoldDays >= CONQUEST_HOLD_DAYS) finishGame('won', 'Колония заняла ' + currentTerritory + '% суши и удержала влияние ' + CONQUEST_HOLD_DAYS + ' дней.');
+      if (state.conquestHoldDays >= CONQUEST_HOLD_DAYS) finishGame('won', 'Колония контролирует ' + currentTerritory + '% объёма аквариума и удержала влияние ' + CONQUEST_HOLD_DAYS + ' дней.');
     }
   }
 
@@ -2552,12 +2778,15 @@ body::before {
       button.classList.toggle('btn-ghost', !active);
     });
     if (state.deployArmed) {
-      mapHint.textContent = 'Высадка: нажмите на сушу, чтобы выпустить организм';
+      mapHint.textContent = 'Выпуск: выберите место на дне аквариума';
     } else if (mode === 'god') {
-      mapHint.textContent = 'Бог: нажмите для осмотра, Shift+клик — пожар';
+      mapHint.textContent = 'Тяните — вращать · колесо — масштаб · Shift+клик — терморазряд';
     } else {
-      mapHint.textContent = 'Существо: выберите зелёного пришельца, затем точку назначения';
+      mapHint.textContent = 'Существо: тап — курс · «Нырнуть/Всплыть» — глубина';
     }
+    const canSteerDepth = mode === 'creature' && Boolean(selectedEntity());
+    diveButton.disabled = !canSteerDepth;
+    riseButton.disabled = !canSteerDepth;
     updateHud();
   }
 
@@ -2608,6 +2837,8 @@ body::before {
       addInspectorRow('Причина', entity.decision && entity.decision.reason ? entity.decision.reason : 'реакция на ближайший стимул');
       addInspectorRow('Питание', dietLabels[entity.diet] || entity.diet);
       addInspectorRow('Поколение', String(entity.generation || 0));
+      addInspectorRow('Глубина', Math.round(AQUARIUM_HEIGHT - (Number(entity.z) || 0)) + ' усл. ед. от поверхности');
+      addInspectorRow('Высота над дном', Math.round(Number(entity.z) || 0) + ' усл. ед.');
       addInspectorRow('Сила', entity.traits.strength.toFixed(2));
       addInspectorRow('Ловкость', entity.traits.agility.toFixed(2));
       addInspectorRow('Конституция', entity.traits.constitution.toFixed(2));
@@ -2643,9 +2874,9 @@ body::before {
       addInspectorRow('Растительная пища', Math.round(cell.food) + ' / ' + foodMax(cell.type));
       addInspectorRow('Проходимость', Math.round(terrainSpeed(cell.type) * 100) + '%');
       addInspectorRow('Видимость', visibility[cell.type] || 'средняя');
-      addInspectorRow('Состояние', fire ? 'горит' : cell.scorched > 0 ? 'недавно выжжена' : 'обычная');
+      addInspectorRow('Состояние', fire ? 'зона перегрева' : cell.scorched > 0 ? 'органика уничтожена' : 'обычная');
       addInspectorRow('Погода', state.weather === 'rain' ? 'дождь' : state.weather === 'snow' ? 'снег' : 'ясно');
-      addInspectorRow('Огонь', fire ? 'радиус ' + Math.round(fire.radius) + ' · топливо ' + Math.round(fire.fuel) : 'нет');
+      addInspectorRow('Терморазряд', fire ? 'радиус ' + Math.round(fire.radius) + ' · органика ' + Math.round(fire.fuel) : 'нет');
       return;
     }
 
@@ -2686,7 +2917,7 @@ body::before {
     const applyCost = alienCount ? Math.ceil(cost * 0.18 * alienCount) : 0;
     genomeCostText.textContent = 'Стоимость: ' + cost + ' · Очки: ' + Math.floor(state.points);
     deployGenomeButton.disabled = state.gameStatus !== 'playing' || state.points < cost;
-    deployGenomeButton.textContent = state.deployArmed ? 'Выберите место…' : 'Высадить на карту';
+    deployGenomeButton.textContent = state.deployArmed ? 'Выберите место…' : 'Выпустить в аквариум';
     deployGenomeButton.setAttribute('aria-pressed', String(state.deployArmed));
     applyGenomeButton.textContent = alienCount ? 'Применить к колонии (' + applyCost + ')' : 'Сохранить геном колонии';
     applyGenomeButton.disabled = state.gameStatus !== 'playing' || state.points < applyCost;
@@ -2711,9 +2942,9 @@ body::before {
     };
     endScreen.hidden = false;
     resultKicker.textContent = result.outcome === 'won' ? 'Эксперимент успешен' : 'Эксперимент завершён';
-    resultTitle.textContent = result.outcome === 'won' ? (result.goal === 'survival' ? 'Колония пережила год' : 'Остров закреплён') : 'Колония вымерла';
+    resultTitle.textContent = result.outcome === 'won' ? (result.goal === 'survival' ? 'Колония пережила год' : 'Аквариум захвачен') : 'Колония вымерла';
     resultText.textContent = result.reason;
-    resultStats.textContent = 'Дней: ' + result.days + ' · территория: ' + result.territory + '% · популяция: ' + result.population + ' · максимум: ' + result.peakPopulation + ' · рождений: ' + result.births + ' · смертей: ' + result.deaths;
+    resultStats.textContent = 'Дней: ' + result.days + ' · объём: ' + result.territory + '% · популяция: ' + result.population + ' · максимум: ' + result.peakPopulation + ' · рождений: ' + result.births + ' · смертей: ' + result.deaths;
   }
 
   function updateHud() {
@@ -2741,29 +2972,32 @@ body::before {
       objectiveText.textContent = 'Пережить один год и сохранить хотя бы одного пришельца';
       objectiveProgress.textContent = survivedDays + ' / ' + SURVIVAL_DAYS + ' дней';
     } else {
-      objectiveText.textContent = 'Закрепиться на острове и занять ' + TARGET_TERRITORY + '% суши';
+      objectiveText.textContent = 'Закрепиться в аквариуме и занять ' + TARGET_TERRITORY + '% объёма воды';
       objectiveProgress.textContent = currentTerritory + ' / ' + TARGET_TERRITORY + '% · удержание ' + Math.floor(state.conquestHoldDays) + ' / ' + CONQUEST_HOLD_DAYS + ' дней';
     }
     weatherBadge.textContent = state.weather === 'rain' ? '☂ Дождь' : state.weather === 'snow' ? '❄ Снег' : (isDaytime() ? '☀ Ясно' : '◐ Ночь');
     speedButton.textContent = 'Скорость ' + speeds[state.speedIndex] + '×';
-    if (state.deployArmed) mapHint.textContent = 'Высадка: нажмите на сушу, чтобы выпустить организм';
-    else if (state.mode === 'god') mapHint.textContent = 'Бог: нажмите для осмотра, Shift+клик — пожар';
-    else mapHint.textContent = 'Существо: выберите зелёного пришельца, затем точку назначения';
+    if (state.deployArmed) mapHint.textContent = 'Выпуск: выберите место на дне аквариума';
+    else if (state.mode === 'god') mapHint.textContent = 'Тяните — вращать · колесо — масштаб · Shift+клик — терморазряд';
+    else mapHint.textContent = 'Существо: тап — курс · кнопки «Нырнуть/Всплыть» — глубина';
 
     if (selected) {
       selectedPanel.hidden = false;
-      selectedText.textContent = selected.name + ' · ' + archetypes[selected.kind].label + ' · энергия ' + Math.round(selected.energy) + ' · здоровье ' + Math.round(selected.health) + ' · ' + selected.stateLabel;
+      selectedText.textContent = selected.name + ' · ' + archetypes[selected.kind].label + ' · глубина ' + Math.round(AQUARIUM_HEIGHT - selected.z) + ' · энергия ' + Math.round(selected.energy) + ' · здоровье ' + Math.round(selected.health) + ' · ' + selected.stateLabel;
     } else {
       selectedPanel.hidden = true;
     }
+    const canSteerDepth = state.mode === 'creature' && Boolean(selected);
+    diveButton.disabled = !canSteerDepth;
+    riseButton.disabled = !canSteerDepth;
     renderInspector();
 
-    if (state.gameStatus === 'won') status.textContent = state.goal === 'survival' ? 'Победа: колония пережила полный год.' : 'Победа: колония удержала достаточно территории.';
+    if (state.gameStatus === 'won') status.textContent = state.goal === 'survival' ? 'Победа: колония пережила полный год.' : 'Победа: колония удержала достаточно объёма.';
     else if (state.gameStatus === 'lost') status.textContent = 'Поражение: колония исчезла.';
-    else if (counts.alien === 0 && state.deployedCount === 0) status.textContent = 'Сконструируйте организм и выберите место высадки на карте.';
-    else if (selected && state.mode === 'creature') status.textContent = 'Вы управляете ' + selected.name + '. Тапните по карте, чтобы задать направление.';
+    else if (counts.alien === 0 && state.deployedCount === 0) status.textContent = 'Сконструируйте организм и выберите место выпуска на дне.';
+    else if (selected && state.mode === 'creature') status.textContent = 'Вы управляете ' + selected.name + '. Тап задаёт курс, «Нырнуть/Всплыть» меняют глубину.';
     else if (state.mode === 'creature') status.textContent = 'Выберите зелёного пришельца, чтобы войти в его тело.';
-    else status.textContent = state.events[0] ? state.events[0].text : 'Колония ищет пищу и расширяет территорию.';
+    else status.textContent = state.events[0] ? state.events[0].text : 'Колония ищет пищу и осваивает объём аквариума.';
     updateEndScreen();
   }
 
@@ -2771,9 +3005,8 @@ body::before {
     const rect = canvas.getBoundingClientRect();
     view.width = rect.width;
     view.height = rect.height;
-    view.dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.max(1, Math.round(view.width * view.dpr));
-    canvas.height = Math.max(1, Math.round(view.height * view.dpr));
+    view.dpr = Math.min(1.6, window.devicePixelRatio || 1);
+    if (aquarium3d) aquarium3d.resize(view.width, view.height, view.dpr);
   }
 
   function coatColor(coat, lightShift, saturationShift) {
@@ -3415,27 +3648,24 @@ body::before {
     ctx.globalAlpha = 1;
   }
 
-  function draw() {
-    if (!view.width || !view.height) return;
-    const c = colors();
-    ctx.setTransform(view.dpr * view.width / LOGICAL_WIDTH, 0, 0, view.dpr * view.height / LOGICAL_HEIGHT, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    drawTerrain();
-    drawDayNightLighting();
-    drawFires();
-    const sortedEntities = [...state.entities].sort((left, right) => left.y - right.y);
-    for (const entity of sortedEntities) drawEntity(entity, c);
-    drawVisualEffects();
-    drawWeather();
-    drawEndState();
+  let first3dFrame = true;
+  function draw(seconds) {
+    if (!view.width || !view.height || !aquarium3d) return;
+    for (const entity of state.entities) entity.visualVisibility = entityVisibility(entity);
+    aquarium3d.render(state, seconds, visual.hoverId);
+    if (first3dFrame) {
+      first3dFrame = false;
+      if (loading3d) {
+        loading3d.classList.add('is-ready');
+        window.setTimeout(() => { loading3d.hidden = true; }, 420);
+      }
+    }
   }
 
   function canvasPoint(event) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: clamp((event.clientX - rect.left) / rect.width * LOGICAL_WIDTH, 0, LOGICAL_WIDTH),
-      y: clamp((event.clientY - rect.top) / rect.height * LOGICAL_HEIGHT, 0, LOGICAL_HEIGHT)
-    };
+    return aquarium3d
+      ? aquarium3d.pick(event.clientX, event.clientY)
+      : { x: LOGICAL_WIDTH * 0.5, y: LOGICAL_HEIGHT * 0.5, z: 0, entityId: null };
   }
 
   function deployOrganism(point) {
@@ -3484,7 +3714,9 @@ body::before {
       deployOrganism(point);
       return;
     }
-    const entity = state.entities.find((candidate) => distance(candidate, point) < 28);
+    const entity = point.entityId
+      ? state.entities.find((candidate) => candidate.id === point.entityId)
+      : null;
     if (entity) {
       state.inspectedId = entity.id;
       state.selectedCell = null;
@@ -3512,6 +3744,7 @@ body::before {
     if (selected && selected.kind === 'alien') {
       selected.targetX = point.x;
       selected.targetY = point.y;
+      selected.targetZ = clamp(Number(selected.targetZ) || Number(selected.z) || preferredLayer(selected, 'explore'), 12, AQUARIUM_HEIGHT - 12);
       selected.manualUntil = state.worldDays + 2.8;
       selected.stateLabel = 'выполняет приказ';
       if (!selected.orderLogAt || state.worldDays - selected.orderLogAt > 1.5) {
@@ -3550,7 +3783,7 @@ body::before {
     state.conquestHoldDays = 0;
     state.gameStatus = 'playing';
     state.result = null;
-    addEvent(state.goal === 'survival' ? 'Цель изменена: пережить год.' : 'Цель изменена: занять территорию.', 'control');
+    addEvent(state.goal === 'survival' ? 'Цель изменена: пережить год.' : 'Цель изменена: занять объём аквариума.', 'control');
     updateHud();
   });
   geneNames.forEach((name) => geneInputs[name].addEventListener('input', () => {
@@ -3609,35 +3842,61 @@ body::before {
     state.speedIndex = (state.speedIndex + 1) % speeds.length;
     updateHud();
   });
+  function changeSelectedDepth(delta) {
+    const selected = selectedEntity();
+    if (state.mode !== 'creature' || !selected) return;
+    selected.targetZ = clamp((Number(selected.targetZ) || Number(selected.z) || 0) + delta, 12, AQUARIUM_HEIGHT - 12);
+    selected.manualUntil = state.worldDays + 2.8;
+    selected.stateLabel = delta > 0 ? 'всплывает по приказу' : 'ныряет по приказу';
+    addEvent(selected.name + (delta > 0 ? ' получил приказ всплыть.' : ' получил приказ нырнуть.'), 'control');
+    updateHud();
+  }
+  diveButton.addEventListener('click', () => changeSelectedDepth(-90));
+  riseButton.addEventListener('click', () => changeSelectedDepth(90));
+  cameraResetButton.addEventListener('click', () => {
+    if (aquarium3d) aquarium3d.resetCamera();
+  });
   logToggle.addEventListener('click', () => {
     logPanel.hidden = !logPanel.hidden;
     logToggle.setAttribute('aria-expanded', String(!logPanel.hidden));
     logToggle.textContent = logPanel.hidden ? 'Показать журнал' : 'Свернуть журнал';
   });
-  canvas.addEventListener('pointerdown', handleCanvas);
+  let pointerDownPosition = null;
+  canvas.addEventListener('pointerdown', (event) => {
+    pointerDownPosition = { x: event.clientX, y: event.clientY };
+  });
+  canvas.addEventListener('pointerup', (event) => {
+    if (!pointerDownPosition) return;
+    const moved = Math.hypot(event.clientX - pointerDownPosition.x, event.clientY - pointerDownPosition.y);
+    pointerDownPosition = null;
+    if (moved < 7) handleCanvas(event);
+  });
   canvas.addEventListener('pointermove', (event) => {
     const point = canvasPoint(event);
-    let nearest = null;
-    let nearestDistance = 34;
-    for (const candidate of state.entities) {
-      const candidateDistance = distance(candidate, point);
-      if (candidateDistance < nearestDistance) {
-        nearest = candidate;
-        nearestDistance = candidateDistance;
-      }
-    }
+    const nearest = point.entityId ? state.entities.find((candidate) => candidate.id === point.entityId) : null;
     visual.hoverId = nearest ? nearest.id : null;
-    canvas.style.cursor = state.deployArmed ? 'copy' : nearest ? 'pointer' : 'crosshair';
+    canvas.style.cursor = state.deployArmed ? 'copy' : nearest ? 'pointer' : 'grab';
   });
   canvas.addEventListener('pointerleave', () => {
+    pointerDownPosition = null;
     visual.hoverId = null;
-    canvas.style.cursor = state.deployArmed ? 'copy' : 'crosshair';
+    canvas.style.cursor = state.deployArmed ? 'copy' : 'grab';
   });
   window.addEventListener('resize', resizeCanvas);
 
   window.addEventListener('keydown', (event) => {
     const selected = selectedEntity();
     if (state.mode !== 'creature' || !selected) return;
+    if (event.key === 'PageUp' || event.key.toLowerCase() === 'q') {
+      event.preventDefault();
+      changeSelectedDepth(90);
+      return;
+    }
+    if (event.key === 'PageDown' || event.key.toLowerCase() === 'e') {
+      event.preventDefault();
+      changeSelectedDepth(-90);
+      return;
+    }
     const directions = {
       ArrowUp: [0, -1],
       ArrowDown: [0, 1],
@@ -3649,6 +3908,7 @@ body::before {
     event.preventDefault();
     selected.targetX = clamp(selected.x + direction[0] * 130, 18, LOGICAL_WIDTH - 18);
     selected.targetY = clamp(selected.y + direction[1] * 130, 18, LOGICAL_HEIGHT - 18);
+    selected.targetZ = clamp(Number(selected.targetZ) || Number(selected.z) || preferredLayer(selected, 'explore'), 12, AQUARIUM_HEIGHT - 12);
     selected.manualUntil = state.worldDays + 2.8;
     selected.stateLabel = 'выполняет приказ';
   });
@@ -3692,7 +3952,7 @@ body::before {
       renderLog();
       hudTimer = 0;
     }
-    draw();
+    draw(seconds);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -3707,7 +3967,7 @@ body::before {
   if (!welcome || !game || !start) return;
 
   try {
-    if (localStorage.getItem('amoebas-ecosystem-game-v4')) {
+    if (localStorage.getItem('amoebas-ecosystem-game-v5-3d')) {
       start.textContent = 'Продолжить игру';
       note.textContent = 'Локальное сохранение найдено';
     }
