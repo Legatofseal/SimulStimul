@@ -116,14 +116,98 @@ export class Aquarium3D {
   }
 
   createSharedGeometry() {
-    const grazerCilia = [];
-    for (let index = 0; index < 24; index += 1) {
-      const angle = index / 24 * TAU;
-      const x = Math.cos(angle) * 1.45;
-      const y = Math.sin(angle) * 0.56;
-      grazerCilia.push([
-        new THREE.Vector3(x, y, 0),
-        new THREE.Vector3(x * 1.12, y * 1.18, Math.sin(index * 2.7) * 0.06)
+    const warpGeometry = (geometry, transform) => {
+      const position = geometry.getAttribute("position");
+      const point = new THREE.Vector3();
+      for (let index = 0; index < position.count; index += 1) {
+        point.fromBufferAttribute(position, index);
+        transform(point, index);
+        position.setXYZ(index, point.x, point.y, point.z);
+      }
+      position.needsUpdate = true;
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return geometry;
+    };
+
+    const amoebaBody = warpGeometry(new THREE.IcosahedronGeometry(1, 3), (point) => {
+      const direction = point.clone().normalize();
+      const ripple =
+        Math.sin(direction.x * 4.2 + direction.y * 1.7) * 0.12 +
+        Math.cos(direction.z * 4.8 - direction.x * 1.4) * 0.08;
+      point.copy(direction.multiplyScalar(0.98 + ripple));
+      point.x *= 1.08;
+      point.y *= 0.78;
+      point.z *= 0.94;
+    });
+
+    const ciliateBody = warpGeometry(new THREE.SphereGeometry(1, 22, 14), (point) => {
+      const originalX = point.x;
+      const taper = 0.78 + (1 - Math.abs(originalX)) * 0.22;
+      point.x = originalX * 1.58 + 0.12 * (1 - originalX * originalX);
+      point.y *= 0.57 * taper;
+      point.z *= 0.68 * taper;
+    });
+
+    const flagellateBody = warpGeometry(new THREE.SphereGeometry(1, 20, 13), (point) => {
+      const originalX = point.x;
+      const tailTaper = originalX < 0 ? 0.48 + (originalX + 1) * 0.52 : 1;
+      point.x = originalX * 1.42 + 0.16;
+      point.y *= 0.66 * tailTaper;
+      point.z *= 0.7 * tailTaper;
+    });
+
+    const radiolarianBody = warpGeometry(new THREE.IcosahedronGeometry(0.92, 2), (point) => {
+      const direction = point.clone().normalize();
+      const faceting = 0.96 + Math.sin(direction.x * 7 + direction.y * 5 - direction.z * 6) * 0.055;
+      point.copy(direction.multiplyScalar(faceting));
+    });
+
+    const trilobiteBody = warpGeometry(new THREE.SphereGeometry(1, 20, 12), (point) => {
+      point.x *= 1.52;
+      point.y *= 0.42 + Math.max(0, 1 - Math.abs(point.x) / 1.52) * 0.12;
+      point.z *= 0.78;
+      if (point.x > 0.72) point.y *= 1.18;
+    });
+
+    const ciliateCilia = [];
+    for (let ring = 0; ring < 3; ring += 1) {
+      const x = -0.92 + ring * 0.92;
+      for (let index = 0; index < 14; index += 1) {
+        const angle = index / 14 * TAU;
+        const y = Math.cos(angle) * 0.58;
+        const z = Math.sin(angle) * 0.69;
+        ciliateCilia.push([
+          new THREE.Vector3(x, y, z),
+          new THREE.Vector3(x, y * 1.23, z * 1.2)
+        ]);
+      }
+    }
+
+    const flagella = [];
+    for (const side of [-1, 1]) {
+      let previous = new THREE.Vector3(-1.1, side * 0.12, side * 0.2);
+      for (let index = 1; index <= 18; index += 1) {
+        const progress = index / 18;
+        const next = new THREE.Vector3(
+          -1.05 - progress * 2.65,
+          side * (0.12 + Math.sin(progress * Math.PI * 3) * 0.22),
+          side * 0.18 + Math.sin(progress * Math.PI * 4 + side) * 0.22
+        );
+        flagella.push([previous, next]);
+        previous = next;
+      }
+    }
+
+    const radiolarianSpikes = [];
+    for (let index = 0; index < 28; index += 1) {
+      const y = 1 - index / 27 * 2;
+      const radius = Math.sqrt(Math.max(0, 1 - y * y));
+      const angle = index * 2.399963229728653;
+      const direction = new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      radiolarianSpikes.push([
+        direction.clone().multiplyScalar(0.82),
+        direction.clone().multiplyScalar(1.72 + hash(index, 204) * 0.26)
       ]);
     }
 
@@ -143,12 +227,16 @@ export class Aquarium3D {
     );
 
     return {
-      alienBody: new THREE.IcosahedronGeometry(1, 2),
+      amoebaBody,
+      ciliateBody,
+      flagellateBody,
+      radiolarianBody,
+      trilobiteBody,
       alienLobe: new THREE.IcosahedronGeometry(0.48, 1),
       nucleus: new THREE.SphereGeometry(0.32, 12, 8),
-      grazerBody: new THREE.SphereGeometry(1, 18, 12),
-      grazerCilia: createLineGeometry(grazerCilia),
-      predatorBody: new THREE.SphereGeometry(1, 18, 10),
+      ciliateCilia: createLineGeometry(ciliateCilia),
+      flagella: createLineGeometry(flagella),
+      radiolarianSpikes: createLineGeometry(radiolarianSpikes),
       predatorRibs: createLineGeometry(predatorRibs),
       mandible: new THREE.ConeGeometry(0.12, 0.68, 7),
       halo: new THREE.TorusGeometry(1.48, 0.035, 7, 42),
@@ -543,70 +631,68 @@ export class Aquarium3D {
     const group = new THREE.Group();
     group.userData.entityId = entity.id;
     group.userData.kind = entity.kind;
+    const morphology = entity.morphology || (entity.kind === "grazer" ? "ciliate" : entity.kind === "predator" ? "trilobite" : "amoeba");
+    group.userData.morphology = morphology;
     const bodyMaterial = this.createCreatureMaterial(entity);
 
-    if (entity.kind === "alien") {
-      const body = this.markShared(new THREE.Mesh(this.shared.alienBody, bodyMaterial));
-      body.userData.entityId = entity.id;
-      group.add(body);
-      group.userData.body = body;
+    const bodyGeometry = {
+      amoeba: this.shared.amoebaBody,
+      ciliate: this.shared.ciliateBody,
+      flagellate: this.shared.flagellateBody,
+      radiolarian: this.shared.radiolarianBody,
+      trilobite: this.shared.trilobiteBody
+    }[morphology] || this.shared.amoebaBody;
+    const body = this.markShared(new THREE.Mesh(bodyGeometry, bodyMaterial));
+    body.userData.entityId = entity.id;
+    group.add(body);
+    group.userData.body = body;
+
+    if (morphology === "amoeba") {
       group.userData.lobes = [];
-      for (let index = 0; index < 3; index += 1) {
+      for (let index = 0; index < 4; index += 1) {
         const lobe = this.markShared(new THREE.Mesh(this.shared.alienLobe, bodyMaterial));
         lobe.userData.entityId = entity.id;
-        lobe.position.set(Math.cos(index / 3 * TAU) * 0.62, Math.sin(index / 3 * TAU) * 0.46, (index - 1) * 0.16);
+        lobe.position.set(Math.cos(index / 4 * TAU) * 0.72, Math.sin(index / 4 * TAU) * 0.38, (index - 1.5) * 0.13);
         group.add(lobe);
         group.userData.lobes.push(lobe);
       }
-      const nucleusMaterial = new THREE.MeshPhysicalMaterial({
-        color: this.coatColor(entity).multiplyScalar(0.42),
-        roughness: 0.5,
+    } else if (morphology === "ciliate") {
+      const detailMaterial = new THREE.LineBasicMaterial({
+        color: this.coatColor(entity).offsetHSL(0, -0.08, 0.24),
         transparent: true,
-        opacity: 0.72
+        opacity: 0.68
       });
-      const nucleus = this.markShared(new THREE.Mesh(this.shared.nucleus, nucleusMaterial));
-      nucleus.position.set(0.08, 0.02, 0.1);
-      nucleus.userData.entityId = entity.id;
-      group.add(nucleus);
-      group.userData.nucleus = nucleus;
-    } else if (entity.kind === "grazer") {
-      const body = this.markShared(new THREE.Mesh(this.shared.grazerBody, bodyMaterial));
-      body.scale.set(1.5, 0.58, 0.64);
-      body.userData.entityId = entity.id;
-      group.add(body);
-      group.userData.body = body;
-      const ciliaMaterial = new THREE.LineBasicMaterial({
-        color: this.coatColor(entity).offsetHSL(0, -0.08, 0.22),
-        transparent: true,
-        opacity: 0.58
-      });
-      const cilia = this.markShared(new THREE.LineSegments(this.shared.grazerCilia, ciliaMaterial));
+      const cilia = this.markShared(new THREE.LineSegments(this.shared.ciliateCilia, detailMaterial));
       cilia.userData.entityId = entity.id;
       group.add(cilia);
       group.userData.cilia = cilia;
-      const nucleusMaterial = new THREE.MeshBasicMaterial({
-        color: this.coatColor(entity).multiplyScalar(0.38),
+    } else if (morphology === "flagellate") {
+      const detailMaterial = new THREE.LineBasicMaterial({
+        color: this.coatColor(entity).offsetHSL(0, -0.08, 0.24),
         transparent: true,
-        opacity: 0.7
+        opacity: 0.68
       });
-      const nucleus = this.markShared(new THREE.Mesh(this.shared.nucleus, nucleusMaterial));
-      nucleus.scale.set(0.75, 0.7, 0.65);
-      nucleus.position.x = -0.15;
-      nucleus.userData.entityId = entity.id;
-      group.add(nucleus);
-      group.userData.nucleus = nucleus;
-    } else {
-      const body = this.markShared(new THREE.Mesh(this.shared.predatorBody, bodyMaterial));
-      body.scale.set(1.58, 0.58, 0.76);
-      body.userData.entityId = entity.id;
-      group.add(body);
-      group.userData.body = body;
-      const ribMaterial = new THREE.LineBasicMaterial({
-        color: this.coatColor(entity).offsetHSL(0, -0.16, 0.24),
+      const flagella = this.markShared(new THREE.LineSegments(this.shared.flagella, detailMaterial));
+      flagella.userData.entityId = entity.id;
+      group.add(flagella);
+      group.userData.flagella = flagella;
+    } else if (morphology === "radiolarian") {
+      const detailMaterial = new THREE.LineBasicMaterial({
+        color: this.coatColor(entity).offsetHSL(0, -0.08, 0.24),
         transparent: true,
-        opacity: 0.74
+        opacity: 0.68
       });
-      const ribs = this.markShared(new THREE.LineSegments(this.shared.predatorRibs, ribMaterial));
+      const spikes = this.markShared(new THREE.LineSegments(this.shared.radiolarianSpikes, detailMaterial));
+      spikes.userData.entityId = entity.id;
+      group.add(spikes);
+      group.userData.spikes = spikes;
+    } else if (morphology === "trilobite") {
+      const detailMaterial = new THREE.LineBasicMaterial({
+        color: this.coatColor(entity).offsetHSL(0, -0.08, 0.24),
+        transparent: true,
+        opacity: 0.68
+      });
+      const ribs = this.markShared(new THREE.LineSegments(this.shared.predatorRibs, detailMaterial));
       ribs.userData.entityId = entity.id;
       group.add(ribs);
       group.userData.ribs = ribs;
@@ -619,6 +705,21 @@ export class Aquarium3D {
         group.add(mandible);
         group.userData.mandibles.push(mandible);
       }
+    }
+
+    if (morphology !== "trilobite") {
+      const nucleusMaterial = new THREE.MeshPhysicalMaterial({
+        color: this.coatColor(entity).multiplyScalar(0.38),
+        roughness: 0.48,
+        transparent: true,
+        opacity: 0.72
+      });
+      const nucleus = this.markShared(new THREE.Mesh(this.shared.nucleus, nucleusMaterial));
+      nucleus.scale.set(morphology === "ciliate" ? 0.82 : morphology === "radiolarian" ? 0.62 : 0.75, 0.7, 0.65);
+      nucleus.position.set(morphology === "flagellate" ? 0.3 : -0.08, 0.02, 0.08);
+      nucleus.userData.entityId = entity.id;
+      group.add(nucleus);
+      group.userData.nucleus = nucleus;
     }
 
     const haloMaterial = new THREE.MeshBasicMaterial({
@@ -677,7 +778,13 @@ export class Aquarium3D {
     }
 
     for (const entity of entities) {
-      const group = this.entityObjects.get(entity.id) || this.createEntityObject(entity);
+      const morphology = entity.morphology || (entity.kind === "grazer" ? "ciliate" : entity.kind === "predator" ? "trilobite" : "amoeba");
+      let group = this.entityObjects.get(entity.id);
+      if (group && group.userData.morphology !== morphology) {
+        this.removeEntityObject(entity.id);
+        group = null;
+      }
+      group = group || this.createEntityObject(entity);
       const selected = entity.id === selectedId;
       const hovered = entity.id === hoveredId;
       group.userData.currentSim = { x: entity.x, y: entity.y, z: entity.z || 0 };
@@ -692,9 +799,11 @@ export class Aquarium3D {
       group.rotation.z += (pitch - group.rotation.z) * clamp(delta * 5, 0.05, 0.36);
 
       const baseScale = 0.5 + clamp(entity.traits?.size || 1, 0.35, 2.5) * 0.36;
-      const pulse = 1 + Math.sin(this.time * 2.2 + (entity.visualPhase || entity.id)) * (entity.kind === "alien" ? 0.055 : 0.024);
+      const pulseAmplitude = morphology === "amoeba" ? 0.06 : morphology === "flagellate" ? 0.032 : morphology === "ciliate" ? 0.022 : 0.014;
+      const pulse = 1 + Math.sin(this.time * 2.2 + (entity.visualPhase || entity.id)) * pulseAmplitude;
       group.scale.setScalar(baseScale * pulse);
-      if (entity.kind === "alien") group.scale.y *= 0.84 + Math.sin(this.time * 1.7 + entity.id) * 0.035;
+      if (morphology === "amoeba") group.scale.y *= 0.92 + Math.sin(this.time * 1.7 + entity.id) * 0.04;
+      if (morphology === "radiolarian") group.rotation.x += delta * 0.12;
 
       const coat = this.coatColor(entity);
       const material = group.userData.bodyMaterial;
@@ -704,14 +813,17 @@ export class Aquarium3D {
       const camouflageAlpha = Number.isFinite(visibility) ? clamp(0.48 + visibility * 0.45, 0.45, 0.96) : 0.82;
       material.opacity = entity.kind === "predator" ? Math.max(0.76, camouflageAlpha) : camouflageAlpha;
       const detailed = selected || hovered;
+      const showStructure = detailed || entities.length <= 90;
       if (group.userData.nucleus) group.userData.nucleus.visible = detailed;
-      if (group.userData.cilia) group.userData.cilia.visible = detailed;
-      if (group.userData.ribs) group.userData.ribs.visible = detailed;
+      if (group.userData.cilia) group.userData.cilia.visible = showStructure;
+      if (group.userData.flagella) group.userData.flagella.visible = showStructure;
+      if (group.userData.spikes) group.userData.spikes.visible = showStructure;
+      if (group.userData.ribs) group.userData.ribs.visible = showStructure;
       if (group.userData.lobes) {
-        for (const lobe of group.userData.lobes) lobe.visible = detailed;
+        for (const lobe of group.userData.lobes) lobe.visible = showStructure;
       }
       if (group.userData.mandibles) {
-        for (const mandible of group.userData.mandibles) mandible.visible = detailed;
+        for (const mandible of group.userData.mandibles) mandible.visible = showStructure;
       }
 
       if (group.userData.lobes) {
@@ -728,6 +840,20 @@ export class Aquarium3D {
       if (group.userData.cilia) {
         group.userData.cilia.rotation.x = Math.sin(this.time * 8 + entity.id) * 0.045;
         group.userData.cilia.rotation.z = Math.cos(this.time * 7.4 + entity.id) * 0.035;
+        group.userData.cilia.material.opacity = detailed ? 0.86 : 0.5;
+      }
+      if (group.userData.flagella) {
+        group.userData.flagella.rotation.x = Math.sin(this.time * 5.6 + entity.id) * 0.14;
+        group.userData.flagella.rotation.z = Math.cos(this.time * 4.8 + entity.id) * 0.09;
+        group.userData.flagella.material.opacity = detailed ? 0.92 : 0.62;
+      }
+      if (group.userData.spikes) {
+        group.userData.spikes.rotation.x += delta * 0.18;
+        group.userData.spikes.rotation.z -= delta * 0.14;
+        group.userData.spikes.material.opacity = detailed ? 0.9 : 0.68;
+      }
+      if (group.userData.ribs) {
+        group.userData.ribs.material.opacity = detailed ? 0.9 : 0.7;
       }
       if (group.userData.mandibles) {
         const bite = Math.sin(this.time * 5.2 + entity.id) * 0.18;
