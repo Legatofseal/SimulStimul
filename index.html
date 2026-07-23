@@ -109,7 +109,7 @@
     <div class="welcome-rules" aria-label="Краткие правила игры">
       <div class="welcome-rule">
         <span class="welcome-rule-number">01</span>
-        <div><div class="welcome-rule-title">Конструируй за очки</div><p>Сила, размер, броня и другие преимущества повышают стоимость высадки. Очки ограничены.</p></div>
+        <div><div class="welcome-rule-title">Конструируй за очки</div><p>Характеристики, маскировка и способности повышают стоимость высадки. Цвет покрова тоже задаётся в геноме.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">02</span>
@@ -121,11 +121,11 @@
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">04</span>
-        <div><div class="welcome-rule-title">Наблюдай эволюцию</div><p>Потомки получают мутации. Маленькие экономят энергию, сильные и бронированные лучше сражаются.</p></div>
+        <div><div class="welcome-rule-title">Наблюдай эволюцию</div><p>Потомки наследуют цвет и способности, а числовые признаки мутируют до ±10%. Интеллект расширяет набор факторов решения.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">05</span>
-        <div><div class="welcome-rule-title">Выбери путь к победе</div><p>Захвати 35% территории или переживи год. Мир продолжает развиваться, пока тебя нет.</p></div>
+        <div><div class="welcome-rule-title">Выбери путь к победе</div><p>Удерживай 35% территории семь дней или переживи год. Мир продолжает развиваться, пока тебя нет.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">06</span>
@@ -173,6 +173,17 @@
   <details class="card eco-constructor">
     <summary>Конструктор организма</summary>
     <div class="eco-constructor-content">
+      <div class="eco-template-row viz-row">
+        <label class="form-label" for="eco-template">Готовый организм</label>
+        <select id="eco-template" class="form-select">
+          <option value="balanced">Адаптивный всеядный</option>
+          <option value="grazer">Экономный травоядный</option>
+          <option value="hunter">Скрытный охотник</option>
+          <option value="solar">Солнечная колония</option>
+          <option value="runner">Быстрый разведчик</option>
+        </select>
+        <button type="button" id="eco-load-template" class="btn btn-ghost">Загрузить шаблон</button>
+      </div>
       <div class="eco-gene-grid">
         <label class="form-label">Сила <span id="eco-gene-strength-value">1.00</span><input id="eco-gene-strength" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
         <label class="form-label">Ловкость <span id="eco-gene-agility-value">1.00</span><input id="eco-gene-agility" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
@@ -180,6 +191,16 @@
         <label class="form-label">Интеллект <span id="eco-gene-intelligence-value">1.00</span><input id="eco-gene-intelligence" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
         <label class="form-label">Размер <span id="eco-gene-size-value">1.00</span><input id="eco-gene-size" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
         <label class="form-label">Броня <span id="eco-gene-armor-value">1.00</span><input id="eco-gene-armor" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
+        <label class="form-label">Маскировка <span id="eco-gene-camouflage-value">1.00</span><input id="eco-gene-camouflage" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
+      </div>
+      <div class="eco-appearance-row">
+        <label class="form-label eco-color-field" for="eco-coat-color">Наследуемый цвет покрова <input id="eco-coat-color" type="color" value="#6fdc8c"></label>
+        <div class="eco-ability-grid" aria-label="Способности организма">
+          <label><input type="checkbox" data-eco-ability="chameleon"> <span><b>Хамелеон</b><small>меняет цвет под биом, тратит энергию</small></span></label>
+          <label><input type="checkbox" data-eco-ability="sprint"> <span><b>Рывок</b><small>ускоряется при охоте и бегстве</small></span></label>
+          <label><input type="checkbox" data-eco-ability="regeneration"> <span><b>Регенерация</b><small>лечится при хорошем запасе энергии</small></span></label>
+          <label><input type="checkbox" data-eco-ability="venom"> <span><b>Яд</b><small>усиливает атаку, но повышает её цену</small></span></label>
+        </div>
       </div>
       <div class="eco-constructor-row viz-row">
         <label class="form-label" for="eco-diet">Метаболизм</label>
@@ -194,6 +215,7 @@
         <button type="button" id="eco-apply-genome" class="btn btn-ghost">Применить к колонии</button>
       </div>
       <div id="eco-derived-stats" class="eco-derived-stats text-small"></div>
+      <div id="eco-brain-guide" class="eco-brain-guide text-small"></div>
     </div>
   </details>
 
@@ -202,6 +224,13 @@
       <canvas id="eco-map" role="img" aria-label="Карта острова с биомами, организмами и пожарами"></canvas>
       <span id="eco-map-hint" class="viz-badge eco-map-hint">Бог: нажмите на клетку для статистики, Shift+клик — пожар</span>
       <span id="eco-weather-badge" class="viz-badge eco-weather-badge">☀ Ясно</span>
+      <div id="eco-end-screen" class="eco-end-screen card" hidden role="dialog" aria-labelledby="eco-result-title">
+        <div id="eco-result-kicker" class="eco-result-kicker">Эксперимент завершён</div>
+        <h2 id="eco-result-title">Колония закрепилась</h2>
+        <p id="eco-result-text"></p>
+        <div id="eco-result-stats" class="eco-result-stats text-small"></div>
+        <button type="button" id="eco-new-experiment" class="btn btn-primary">Новый эксперимент</button>
+      </div>
     </div>
     <aside id="eco-inspector" class="card eco-inspector" aria-live="polite">
       <div class="eco-inspector-title">Инспектор</div>
@@ -293,6 +322,16 @@
   margin-top: 0.65rem;
 }
 
+#ecosystem-game-prototype .eco-template-row {
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+}
+
+#ecosystem-game-prototype .eco-template-row .form-select {
+  flex: 1 1 260px;
+}
+
 #ecosystem-game-prototype .eco-gene-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -305,6 +344,56 @@
 }
 
 #ecosystem-game-prototype .eco-gene-grid .form-label span {
+  color: var(--muted-foreground);
+}
+
+#ecosystem-game-prototype .eco-appearance-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.32fr) minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: stretch;
+  margin-top: 0.75rem;
+}
+
+#ecosystem-game-prototype .eco-color-field {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+}
+
+#ecosystem-game-prototype .eco-color-field input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--card);
+}
+
+#ecosystem-game-prototype .eco-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+#ecosystem-game-prototype .eco-ability-grid label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: start;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  cursor: pointer;
+}
+
+#ecosystem-game-prototype .eco-ability-grid span,
+#ecosystem-game-prototype .eco-ability-grid small {
+  display: block;
+}
+
+#ecosystem-game-prototype .eco-ability-grid small {
+  margin-top: 0.12rem;
   color: var(--muted-foreground);
 }
 
@@ -321,6 +410,13 @@
 #ecosystem-game-prototype .eco-derived-stats {
   margin-top: 0.6rem;
   color: var(--muted-foreground);
+}
+
+#ecosystem-game-prototype .eco-brain-guide {
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
 }
 
 #ecosystem-game-prototype .eco-world-layout {
@@ -391,6 +487,44 @@
 
 #ecosystem-game-prototype .eco-weather-badge {
   right: 0.65rem;
+}
+
+#ecosystem-game-prototype .eco-end-screen[hidden] {
+  display: none !important;
+}
+
+#ecosystem-game-prototype .eco-end-screen {
+  position: absolute;
+  inset: 14% 17%;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  gap: 0.7rem;
+  padding: 1.25rem;
+  border: 2px solid var(--primary);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+#ecosystem-game-prototype .eco-end-screen h2,
+#ecosystem-game-prototype .eco-end-screen p {
+  margin: 0;
+}
+
+#ecosystem-game-prototype .eco-result-kicker {
+  color: var(--primary);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#ecosystem-game-prototype .eco-result-stats {
+  color: var(--muted-foreground);
+}
+
+#ecosystem-game-prototype .eco-end-screen .btn {
+  justify-self: center;
 }
 
 #ecosystem-game-prototype .eco-controls {
@@ -471,6 +605,15 @@
   background: var(--viz-series-4);
 }
 
+#ecosystem-game-prototype .eco-log-line[data-type="decision"] .eco-log-marker {
+  background: var(--secondary);
+}
+
+#ecosystem-game-prototype .eco-log-line[data-type="result"] .eco-log-marker {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
 #ecosystem-game-prototype .eco-status {
   align-items: center;
   justify-content: space-between;
@@ -530,6 +673,24 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  #ecosystem-game-prototype .eco-template-row,
+  #ecosystem-game-prototype .eco-appearance-row {
+    grid-template-columns: 1fr;
+  }
+
+  #ecosystem-game-prototype .eco-template-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #ecosystem-game-prototype .eco-ability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #ecosystem-game-prototype .eco-end-screen {
+    inset: 8% 5%;
+  }
+
   #ecosystem-game-prototype .eco-constructor-row {
     align-items: stretch;
     flex-direction: column;
@@ -561,10 +722,14 @@
   const objectiveText = document.getElementById('eco-objective-text');
   const goalSelect = document.getElementById('eco-goal');
   const dietSelect = document.getElementById('eco-diet');
+  const templateSelect = document.getElementById('eco-template');
+  const loadTemplateButton = document.getElementById('eco-load-template');
+  const coatColorInput = document.getElementById('eco-coat-color');
   const applyGenomeButton = document.getElementById('eco-apply-genome');
   const deployGenomeButton = document.getElementById('eco-deploy-genome');
   const genomeCostText = document.getElementById('eco-genome-cost');
   const derivedStats = document.getElementById('eco-derived-stats');
+  const brainGuide = document.getElementById('eco-brain-guide');
   const mapHint = document.getElementById('eco-map-hint');
   const inspectorContent = document.getElementById('eco-inspector-content');
   const status = document.getElementById('eco-status');
@@ -575,10 +740,17 @@
   const logToggle = document.getElementById('eco-log-toggle');
   const logPanel = document.getElementById('eco-log-panel');
   const logList = document.getElementById('eco-log-list');
+  const endScreen = document.getElementById('eco-end-screen');
+  const resultKicker = document.getElementById('eco-result-kicker');
+  const resultTitle = document.getElementById('eco-result-title');
+  const resultText = document.getElementById('eco-result-text');
+  const resultStats = document.getElementById('eco-result-stats');
+  const newExperimentButton = document.getElementById('eco-new-experiment');
   const modeButtons = [...root.querySelectorAll('[data-eco-mode]')];
-  const geneNames = ['strength', 'agility', 'constitution', 'intelligence', 'size', 'armor'];
+  const geneNames = ['strength', 'agility', 'constitution', 'intelligence', 'size', 'armor', 'camouflage'];
   const geneInputs = Object.fromEntries(geneNames.map((name) => [name, document.getElementById('eco-gene-' + name)]));
   const geneValueLabels = Object.fromEntries(geneNames.map((name) => [name, document.getElementById('eco-gene-' + name + '-value')]));
+  const abilityInputs = Object.fromEntries([...root.querySelectorAll('[data-eco-ability]')].map((input) => [input.dataset.ecoAbility, input]));
 
   const LOGICAL_WIDTH = 1200;
   const LOGICAL_HEIGHT = 750;
@@ -586,10 +758,37 @@
   const TERRAIN_ROWS = 31;
   const LIVE_RATE = 0.015;
   const TARGET_TERRITORY = 35;
+  const CONQUEST_HOLD_DAYS = 7;
   const SURVIVAL_DAYS = 365;
-  const STORAGE_KEY = 'amoebas-ecosystem-game-v3';
+  const MUTATION_FACTOR = 0.10;
+  const STORAGE_KEY = 'amoebas-ecosystem-game-v4';
   const STARTING_POINTS = 360;
   const speeds = [1, 4, 12];
+
+  const abilityDefinitions = {
+    chameleon: { label: 'хамелеон', cost: 34 },
+    sprint: { label: 'рывок', cost: 20 },
+    regeneration: { label: 'регенерация', cost: 28 },
+    venom: { label: 'яд', cost: 26 }
+  };
+
+  const terrainAppearance = {
+    water: { hue: 202, saturation: 42, lightness: 34 },
+    meadow: { hue: 104, saturation: 48, lightness: 42 },
+    forest: { hue: 132, saturation: 42, lightness: 28 },
+    wetland: { hue: 168, saturation: 34, lightness: 34 },
+    rock: { hue: 220, saturation: 8, lightness: 42 },
+    desert: { hue: 42, saturation: 52, lightness: 52 },
+    snow: { hue: 205, saturation: 18, lightness: 82 }
+  };
+
+  const genomeTemplates = {
+    balanced: { strength: 1, agility: 1.08, constitution: 1.05, intelligence: 1.25, size: 0.92, armor: 0.86, camouflage: 1, diet: 'omnivore', coat: { hue: 137, saturation: 58, lightness: 58 }, abilities: { sprint: true } },
+    grazer: { strength: 0.62, agility: 1.12, constitution: 1.12, intelligence: 0.92, size: 0.66, armor: 0.58, camouflage: 1.18, diet: 'herbivore', coat: { hue: 106, saturation: 42, lightness: 46 }, abilities: { regeneration: true } },
+    hunter: { strength: 1.38, agility: 1.22, constitution: 0.98, intelligence: 1.72, size: 1.08, armor: 0.82, camouflage: 1.62, diet: 'carnivore', coat: { hue: 128, saturation: 28, lightness: 30 }, abilities: { chameleon: true, venom: true } },
+    solar: { strength: 0.48, agility: 0.72, constitution: 1.35, intelligence: 1.08, size: 0.78, armor: 0.74, camouflage: 1.08, diet: 'solar', coat: { hue: 92, saturation: 66, lightness: 48 }, abilities: { regeneration: true } },
+    runner: { strength: 0.82, agility: 1.72, constitution: 0.82, intelligence: 1.42, size: 0.58, armor: 0.44, camouflage: 0.88, diet: 'omnivore', coat: { hue: 174, saturation: 58, lightness: 52 }, abilities: { sprint: true } }
+  };
 
   const terrain = [];
   const landCells = [];
@@ -611,6 +810,7 @@
     weatherTimer: 5,
     goal: 'conquest',
     goalStartDay: 1168,
+    conquestHoldDays: 0,
     genome: {
       strength: 1,
       agility: 1,
@@ -618,7 +818,10 @@
       intelligence: 1,
       size: 1,
       armor: 1,
-      diet: 'omnivore'
+      camouflage: 1,
+      diet: 'omnivore',
+      coat: { hue: 137, saturation: 58, lightness: 58 },
+      abilities: {}
     },
     draftGenome: {
       strength: 1,
@@ -627,19 +830,26 @@
       intelligence: 1,
       size: 1,
       armor: 1,
-      diet: 'omnivore'
+      camouflage: 1,
+      diet: 'omnivore',
+      coat: { hue: 137, saturation: 58, lightness: 58 },
+      abilities: {}
     },
     points: STARTING_POINTS,
     deployedCount: 0,
     deployArmed: false,
     gameStatus: 'playing',
+    peakAlienPopulation: 0,
+    births: 0,
+    deaths: 0,
+    result: null,
     lastSavedAt: Date.now()
   };
 
   const archetypes = {
     alien: {
       label: 'пришелец',
-      baseGenes: { strength: 1, agility: 1, constitution: 1, intelligence: 1, size: 1, armor: 1 },
+      baseGenes: { strength: 1, agility: 1, constitution: 1, intelligence: 1, size: 1, armor: 1, camouflage: 1 },
       baseSize: 0.92,
       baseSpeed: 48,
       baseMetabolism: 0.62,
@@ -649,6 +859,8 @@
       attackCooldown: 1.3,
       reproductionCost: 32,
       maxPopulation: 72,
+      baseCoat: { hue: 137, saturation: 58, lightness: 58 },
+      baseAbilities: {},
       color: '--viz-series-1',
       canEatGrass: true,
       canSolar: true,
@@ -656,7 +868,7 @@
     },
     grazer: {
       label: 'травоядное',
-      baseGenes: { strength: 0.72, agility: 1.08, constitution: 0.9, intelligence: 0.72, size: 0.72, armor: 0.72 },
+      baseGenes: { strength: 0.72, agility: 1.08, constitution: 0.9, intelligence: 0.72, size: 0.72, armor: 0.72, camouflage: 1.08 },
       baseSize: 0.74,
       baseSpeed: 42,
       baseMetabolism: 0.42,
@@ -666,6 +878,8 @@
       attackCooldown: 2.1,
       reproductionCost: 24,
       maxPopulation: 100,
+      baseCoat: { hue: 94, saturation: 52, lightness: 55 },
+      baseAbilities: { sprint: true },
       color: '--viz-series-3',
       canEatGrass: true,
       canSolar: false,
@@ -673,7 +887,7 @@
     },
     predator: {
       label: 'хищник',
-      baseGenes: { strength: 1.3, agility: 1.08, constitution: 1.18, intelligence: 0.98, size: 1.3, armor: 1.18 },
+      baseGenes: { strength: 1.3, agility: 1.08, constitution: 1.18, intelligence: 0.98, size: 1.3, armor: 1.18, camouflage: 0.92 },
       baseSize: 1.24,
       baseSpeed: 55,
       baseMetabolism: 1.05,
@@ -683,6 +897,8 @@
       attackCooldown: 1.5,
       reproductionCost: 46,
       maxPopulation: 32,
+      baseCoat: { hue: 326, saturation: 40, lightness: 58 },
+      baseAbilities: { sprint: true },
       color: '--viz-series-4',
       canEatGrass: false,
       canSolar: false,
@@ -721,6 +937,110 @@
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
+  }
+
+  function normalizeAbilities(source) {
+    const abilities = {};
+    for (const name of Object.keys(abilityDefinitions)) abilities[name] = Boolean(source && source[name]);
+    return abilities;
+  }
+
+  function normalizeCoat(source, fallback) {
+    const base = source || fallback || archetypes.alien.baseCoat;
+    return {
+      hue: ((Number(base.hue) || 0) % 360 + 360) % 360,
+      saturation: clamp(Number(base.saturation) || 0, 0, 100),
+      lightness: clamp(Number(base.lightness) || 50, 12, 88)
+    };
+  }
+
+  function cloneGenome(source) {
+    const genome = {};
+    for (const name of geneNames) genome[name] = clamp(Number(source && source[name]) || 1, 0.35, 2.5);
+    genome.diet = source && ['herbivore', 'omnivore', 'carnivore', 'solar'].includes(source.diet) ? source.diet : 'omnivore';
+    genome.coat = normalizeCoat(source && source.coat, archetypes.alien.baseCoat);
+    genome.abilities = normalizeAbilities(source && source.abilities);
+    return genome;
+  }
+
+  function hueDistance(a, b) {
+    const difference = Math.abs((((a - b) % 360) + 360) % 360);
+    return Math.min(difference, 360 - difference);
+  }
+
+  function mixHue(current, target, amount) {
+    let difference = ((target - current + 540) % 360) - 180;
+    return (current + difference * clamp(amount, 0, 1) + 360) % 360;
+  }
+
+  function hslToHex(coat) {
+    const h = ((coat.hue % 360) + 360) % 360;
+    const s = clamp(coat.saturation, 0, 100) / 100;
+    const l = clamp(coat.lightness, 0, 100) / 100;
+    const chroma = (1 - Math.abs(2 * l - 1)) * s;
+    const x = chroma * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - chroma / 2;
+    let rgb = [0, 0, 0];
+    if (h < 60) rgb = [chroma, x, 0];
+    else if (h < 120) rgb = [x, chroma, 0];
+    else if (h < 180) rgb = [0, chroma, x];
+    else if (h < 240) rgb = [0, x, chroma];
+    else if (h < 300) rgb = [x, 0, chroma];
+    else rgb = [chroma, 0, x];
+    return '#' + rgb.map((value) => Math.round((value + m) * 255).toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToHsl(hex) {
+    const value = String(hex || '').replace('#', '');
+    if (!/^[0-9a-f]{6}$/i.test(value)) return normalizeCoat(archetypes.alien.baseCoat);
+    const r = parseInt(value.slice(0, 2), 16) / 255;
+    const g = parseInt(value.slice(2, 4), 16) / 255;
+    const b = parseInt(value.slice(4, 6), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    const lightness = (max + min) / 2;
+    let hue = 0;
+    if (delta) {
+      if (max === r) hue = 60 * (((g - b) / delta) % 6);
+      else if (max === g) hue = 60 * ((b - r) / delta + 2);
+      else hue = 60 * ((r - g) / delta + 4);
+    }
+    const saturation = delta ? delta / (1 - Math.abs(2 * lightness - 1)) : 0;
+    return normalizeCoat({ hue: (hue + 360) % 360, saturation: saturation * 100, lightness: lightness * 100 });
+  }
+
+  function brainProfile(intelligenceValue) {
+    const intelligence = clamp(Number(intelligenceValue) || 1, 0.35, 2.5);
+    const factors = ['голод', 'опасность'];
+    if (intelligence >= 0.65) factors.push('доступность еды');
+    if (intelligence >= 0.95) factors.push('дистанция до добычи');
+    if (intelligence >= 1.2) factors.push('готовность к размножению', 'ценность исследования');
+    if (intelligence >= 1.45) factors.push('сила противника');
+    if (intelligence >= 1.7) factors.push('маскировка и конкуренты');
+    if (intelligence >= 2) factors.push('биом, погода и выгода энергии');
+    const tier = intelligence < 0.7 ? 'инстинктивный' : intelligence < 1.15 ? 'базовый' : intelligence < 1.55 ? 'адаптивный' : intelligence < 1.95 ? 'тактический' : 'стратегический';
+    return {
+      tier,
+      factors,
+      searchSamples: 8 + Math.floor(intelligence * 11),
+      memoryDays: 1.5 + intelligence * 4,
+      riskAwareness: clamp((intelligence - 0.7) / 1.3, 0, 1),
+      camouflageAwareness: clamp((intelligence - 1.15) / 0.85, 0, 1)
+    };
+  }
+
+  function abilityLabels(abilities) {
+    return Object.keys(abilityDefinitions).filter((name) => abilities && abilities[name]).map((name) => abilityDefinitions[name].label);
+  }
+
+  function factorWord(count) {
+    const mod100 = count % 100;
+    const mod10 = count % 10;
+    if (mod100 >= 11 && mod100 <= 14) return 'факторов';
+    if (mod10 === 1) return 'фактор';
+    if (mod10 >= 2 && mod10 <= 4) return 'фактора';
+    return 'факторов';
   }
 
   function distance(a, b) {
@@ -807,20 +1127,22 @@
     const size = genes.size;
     const agility = Math.max(0.35, genes.agility);
     const constitution = Math.max(0.35, genes.constitution);
-    const efficiency = clamp(0.78 + 0.22 * Math.pow(constitution, 0.7), 0.45, 1.35);
-    const speed = Math.pow(agility, 0.85) * Math.pow(size, 0.25) / (1 + 0.45 * (genes.armor - 1));
-    const maxHealth = 80 * Math.pow(constitution, 1.15) * Math.pow(size, 0.75);
-    const maxEnergy = 100 * Math.pow(constitution, 0.75) * Math.pow(size, 0.7);
-    const metabolism = base.baseMetabolism * Math.pow(size, 1.25) * (0.75 + 0.18 * genes.strength + 0.12 * genes.intelligence) / efficiency;
-    const movementCost = 0.021 * Math.pow(size, 1.15) * (0.8 + 0.2 * genes.strength) / Math.pow(agility, 0.35) / efficiency;
+    const efficiency = clamp(0.8 + 0.2 * Math.pow(constitution, 0.7), 0.48, 1.34);
+    const speed = Math.pow(agility, 0.88) * Math.pow(size, 0.22) / (1 + 0.42 * Math.max(-0.4, genes.armor - 1));
+    const maxHealth = 78 * Math.pow(constitution, 1.18) * Math.pow(size, 0.78);
+    const maxEnergy = 94 * Math.pow(constitution, 0.72) * Math.pow(size, 0.74);
+    const metabolism = base.baseMetabolism * Math.pow(size, 1.28) * (0.77 + 0.14 * genes.strength + 0.065 * genes.intelligence + 0.045 * genes.armor) / efficiency;
+    const movementCost = 0.019 * Math.pow(size, 1.17) * (0.82 + 0.18 * genes.strength) / Math.pow(agility, 0.38) / efficiency;
     const damage = base.baseDamage * Math.pow(genes.strength, 1.1) * Math.pow(size, 0.55);
     const attackCooldown = base.attackCooldown / Math.pow(agility, 0.8) * (1 + 0.12 * (size - 1));
     const attackCost = 7 * (0.6 + Math.pow(genes.strength, 0.8)) * Math.pow(size, 0.45);
-    const perception = 50 * Math.pow(Math.max(0.35, genes.intelligence), 0.85);
-    const reproductionCost = base.reproductionCost * Math.pow(size, 1.1) / Math.pow(constitution, 0.25);
-    const reproductionCooldown = 28 * Math.pow(size, 0.8) / Math.pow(constitution, 0.55);
-    const fertility = Math.pow(constitution, 0.55) / Math.pow(size, 0.8);
+    const perception = 48 * Math.pow(Math.max(0.35, genes.intelligence), 0.9);
+    const reproductionCost = base.reproductionCost * Math.pow(size, 1.08) / Math.pow(constitution, 0.28);
+    const reproductionCooldown = 27 * Math.pow(size, 0.92) / Math.pow(constitution, 0.58);
+    const fertility = Math.pow(constitution, 0.58) / Math.pow(size, 0.92);
     const fireResistance = Math.pow(constitution, 0.55) * (0.92 + genes.armor * 0.08);
+    const camouflageEffect = Math.pow(genes.camouflage, 0.88) / Math.pow(size, 0.28);
+    const maxAge = 520 * Math.pow(constitution, 0.62) / Math.pow(size, 0.18);
     return {
       ...genes,
       speed,
@@ -837,7 +1159,9 @@
       reproductionCost,
       reproductionCooldown,
       fertility,
-      fireResistance
+      fireResistance,
+      camouflageEffect,
+      maxAge
     };
   }
 
@@ -845,7 +1169,8 @@
     const diet = inputGenes.diet || 'omnivore';
     const dietCost = { herbivore: 0, omnivore: 14, carnivore: 18, solar: 12 }[diet] || 0;
     const geneCost = geneNames.reduce((total, name) => total + 9 * Math.pow(clamp(Number(inputGenes[name]) || 1, 0.35, 2.5), 1.55), 0);
-    return Math.round(18 + geneCost + dietCost);
+    const abilityCost = Object.keys(abilityDefinitions).reduce((total, name) => total + (inputGenes.abilities && inputGenes.abilities[name] ? abilityDefinitions[name].cost : 0), 0);
+    return Math.round(18 + geneCost + dietCost + abilityCost);
   }
 
   function mutateTraits(kind, parent, genesOverride) {
@@ -855,10 +1180,32 @@
     const genes = {};
     for (const name of geneNames) {
       const value = Number(source[name]) || baseGenes[name] || 1;
-      const spread = parent ? 0.2 : 0.12;
-      genes[name] = clamp(value * (1 + (random() - 0.5) * spread), 0.35, 2.5);
+      const mutation = parent ? (random() * 2 - 1) * MUTATION_FACTOR : (random() * 2 - 1) * 0.04;
+      genes[name] = clamp(value * (1 + mutation), 0.35, 2.5);
     }
     return deriveStatsFromGenes(kind, genes);
+  }
+
+  function inheritedCoat(kind, parent, override) {
+    if (override && override.coat) return normalizeCoat(override.coat, archetypes[kind].baseCoat);
+    const source = normalizeCoat(parent && parent.coat, archetypes[kind].baseCoat);
+    if (!parent) return source;
+    return normalizeCoat({
+      hue: source.hue + (random() * 2 - 1) * 14,
+      saturation: source.saturation + (random() * 2 - 1) * 6,
+      lightness: source.lightness + (random() * 2 - 1) * 5
+    }, archetypes[kind].baseCoat);
+  }
+
+  function inheritedAbilities(kind, parent, override) {
+    if (override && override.abilities) return normalizeAbilities(override.abilities);
+    const abilities = normalizeAbilities(parent ? parent.abilities : archetypes[kind].baseAbilities);
+    if (parent) {
+      for (const name of Object.keys(abilityDefinitions)) {
+        if (random() < 0.012) abilities[name] = !abilities[name];
+      }
+    }
+    return abilities;
   }
 
   function entityName(kind, id) {
@@ -870,6 +1217,8 @@
     if (state.entities.length >= 210 || !isHabitable(kind, x, y)) return null;
     const base = archetypes[kind];
     const traits = mutateTraits(kind, parent, genesOverride);
+    const coat = inheritedCoat(kind, parent, genesOverride);
+    const abilities = inheritedAbilities(kind, parent, genesOverride);
     const entity = {
       id: state.nextId++,
       kind,
@@ -880,6 +1229,10 @@
       targetY: clamp(y + (random() - 0.5) * 100, 18, LOGICAL_HEIGHT - 18),
       traits,
       diet: dietOverride || (parent ? parent.diet : kind === 'alien' ? state.genome.diet : 'native'),
+      coat,
+      displayCoat: { ...coat },
+      abilities,
+      generation: parent ? (Number(parent.generation) || 0) + 1 : 0,
       age: parent ? 0 : 20 + random() * 70,
       energy: parent ? traits.maxEnergy * 0.42 : traits.maxEnergy * (0.58 + random() * 0.32),
       health: traits.maxHealth,
@@ -888,7 +1241,9 @@
       reproTimer: 12 + random() * 12,
       pulse: random() * Math.PI * 2,
       manualUntil: 0,
-      stateLabel: 'исследует'
+      stateLabel: 'исследует',
+      decision: { action: 'explore', reason: 'мир ещё неизвестен', priority: 6, at: state.worldDays },
+      memory: null
     };
     entity.name = entityName(kind, entity.id);
     entity.energy = clamp(entity.energy, 0, traits.maxEnergy);
@@ -906,20 +1261,26 @@
     state.nextId = 1;
     state.worldDays = 1168;
     state.goalStartDay = state.worldDays;
+    state.conquestHoldDays = 0;
     state.points = STARTING_POINTS;
     state.deployedCount = 0;
     state.deployArmed = false;
     state.gameStatus = 'playing';
+    state.peakAlienPopulation = 0;
+    state.births = 0;
+    state.deaths = 0;
+    state.result = null;
 
     
     for (let i = 0; i < 42; i += 1) spawn('grazer', 380 + random() * 480, 150 + random() * 420);
     for (let i = 0; i < 10; i += 1) spawn('predator', 540 + random() * 410, 185 + random() * 370);
     addEvent('Мир готов. Сконструируйте первого пришельца.', 'system');
+    addEvent('Интеллект определяет, сколько факторов организм учитывает при выборе действия.', 'decision');
   }
 
   function addEvent(text, type) {
     state.events.unshift({ text, type: type || 'info', at: state.worldDays });
-    state.events = state.events.slice(0, 10);
+    state.events = state.events.slice(0, 36);
   }
 
   function latestEventText() {
@@ -937,7 +1298,7 @@
       empty.textContent = 'Событий пока нет.';
       logList.appendChild(empty);
     } else {
-      const markers = { fire: '!', danger: '!', death: '×', combat: '⚔', birth: '+', weather: '~', control: '•', system: '·', info: '·' };
+      const markers = { fire: '!', danger: '!', death: '×', combat: '⚔', birth: '+', weather: '~', control: '•', decision: '→', result: '★', system: '·', info: '·' };
       entries.forEach((entry) => {
         const event = typeof entry === 'string' ? { text: entry, type: 'info', at: state.worldDays } : entry;
         const line = document.createElement('li');
@@ -991,10 +1352,9 @@
     state.deployArmed = false;
     state.goal = saved.goal === 'survival' ? 'survival' : 'conquest';
     state.goalStartDay = Number.isFinite(Number(saved.goalStartDay)) ? Number(saved.goalStartDay) : state.worldDays;
-    state.genome = { ...state.genome, ...(saved.genome || {}) };
-    state.genome.diet = ['herbivore', 'omnivore', 'carnivore', 'solar'].includes(state.genome.diet) ? state.genome.diet : 'omnivore';
-    state.draftGenome = { ...state.genome, ...(saved.draftGenome || {}) };
-    state.draftGenome.diet = ['herbivore', 'omnivore', 'carnivore', 'solar'].includes(state.draftGenome.diet) ? state.draftGenome.diet : state.genome.diet;
+    state.conquestHoldDays = Math.max(0, Number(saved.conquestHoldDays) || 0);
+    state.genome = cloneGenome(saved.genome || state.genome);
+    state.draftGenome = cloneGenome(saved.draftGenome || state.genome);
     state.entities.forEach((entity) => {
       const base = archetypes[entity.kind] || archetypes.grazer;
       if (!entity.traits || !Number.isFinite(entity.traits.maxHealth)) {
@@ -1006,11 +1366,17 @@
         entity.energy = clamp((Number(entity.energy) || 0) / 100 * entity.traits.maxEnergy, 0, entity.traits.maxEnergy);
         entity.health = clamp((Number(entity.health) || 0) / 100 * entity.traits.maxHealth, 0, entity.traits.maxHealth);
       } else {
-        entity.traits = deriveStatsFromGenes(entity.kind, entity.traits);
+        entity.traits = deriveStatsFromGenes(entity.kind, { ...base.baseGenes, ...entity.traits });
         entity.energy = clamp(Number(entity.energy) || 0, 0, entity.traits.maxEnergy);
         entity.health = clamp(Number(entity.health) || 0, 0, entity.traits.maxHealth);
       }
       entity.diet = entity.diet || (entity.kind === 'alien' ? state.genome.diet : 'native');
+      entity.coat = normalizeCoat(entity.coat, base.baseCoat);
+      entity.displayCoat = normalizeCoat(entity.displayCoat || entity.coat, entity.coat);
+      entity.abilities = normalizeAbilities(entity.abilities || base.baseAbilities);
+      entity.generation = Math.max(0, Number(entity.generation) || 0);
+      entity.decision = entity.decision && entity.decision.action ? entity.decision : { action: 'explore', reason: 'оценивает местность', priority: 6, at: state.worldDays };
+      entity.memory = entity.memory || null;
       entity.thinkTimer = Number(entity.thinkTimer) || 0;
       entity.reproTimer = Number(entity.reproTimer) || 0;
     });
@@ -1024,7 +1390,11 @@
     state.weatherTimer = Number(saved.weatherTimer) || 4;
     state.mode = saved.mode === 'creature' ? 'creature' : 'god';
     state.speedIndex = clamp(Number(saved.speedIndex) || 0, 0, speeds.length - 1);
-    state.gameStatus = saved.gameStatus || 'playing';
+    state.gameStatus = ['playing', 'won', 'lost'].includes(saved.gameStatus) ? saved.gameStatus : 'playing';
+    state.peakAlienPopulation = Math.max(0, Number(saved.peakAlienPopulation) || countSpecies().alien);
+    state.births = Math.max(0, Number(saved.births) || 0);
+    state.deaths = Math.max(0, Number(saved.deaths) || 0);
+    state.result = saved.result || null;
     state.lastSavedAt = Number(saved.lastSavedAt) || Date.now();
 
     const elapsedSeconds = clamp((Date.now() - state.lastSavedAt) / 1000, 0, 7 * 24 * 60 * 60);
@@ -1098,14 +1468,62 @@
     }
   }
 
+  function coatMatch(entity, cell) {
+    const target = terrainAppearance[cell && cell.type] || terrainAppearance.meadow;
+    const coat = normalizeCoat(entity.displayCoat || entity.coat, target);
+    const hueMatch = 1 - hueDistance(coat.hue, target.hue) / 180;
+    const saturationMatch = 1 - Math.abs(coat.saturation - target.saturation) / 100;
+    const lightnessMatch = 1 - Math.abs(coat.lightness - target.lightness) / 100;
+    return clamp(hueMatch * 0.55 + saturationMatch * 0.2 + lightnessMatch * 0.25, 0, 1);
+  }
+
+  function entityVisibility(entity) {
+    const cell = getCellAt(entity.x, entity.y);
+    const match = coatMatch(entity, cell);
+    const camouflage = clamp((entity.traits.camouflageEffect - 0.45) * 0.28, 0, 0.5);
+    let visibility = 1 - camouflage * match;
+    if (entity.abilities && entity.abilities.chameleon) visibility -= 0.2 * match;
+    if (cell && cell.type === 'forest') visibility -= 0.08;
+    if (entity.decision && (entity.decision.action === 'flee' || entity.decision.action === 'hunt')) visibility += 0.12;
+    return clamp(visibility, 0.16, 1);
+  }
+
+  function combatPower(entity) {
+    const healthRatio = clamp(entity.health / Math.max(1, entity.traits.maxHealth), 0, 1);
+    const abilityBonus = entity.abilities && entity.abilities.venom ? 1.22 : 1;
+    return entity.traits.damage * abilityBonus * (0.55 + healthRatio * 0.45) + entity.traits.armor * 12;
+  }
+
   function nearestFoodTarget(entity) {
+    const brain = brainProfile(entity.traits.intelligence);
     let best = null;
     let bestScore = -Infinity;
-    for (let i = 0; i < 14 + Math.floor(entity.traits.intelligence * 8); i += 1) {
+    for (let i = 0; i < brain.searchSamples; i += 1) {
       const cell = landCells[Math.floor(random() * landCells.length)];
-      if (!cell || cell.food < 12) continue;
-      const typePenalty = cell.type === 'forest' ? 1.08 : cell.type === 'meadow' ? 0.92 : 1.25;
-      const score = cell.food / (distance(entity, cell) + 35) / typePenalty;
+      if (!cell || cell.food < 10) continue;
+      const travel = distance(entity, cell) + 35;
+      const accessibility = Math.max(0.25, terrainSpeed(cell.type));
+      const weatherFactor = brain.factors.length >= 8 && state.weather === 'snow' && cell.type !== 'snow' ? 0.72 : 1;
+      const competition = brain.factors.length >= 7 ? state.entities.filter((other) => other !== entity && distance(other, cell) < 55).length : 0;
+      const score = cell.food * accessibility * weatherFactor / travel / (1 + competition * 0.18);
+      if (score > bestScore) {
+        bestScore = score;
+        best = cell;
+      }
+    }
+    if (best) entity.memory = { type: 'food', x: best.x, y: best.y, until: state.worldDays + brain.memoryDays };
+    else if (entity.memory && entity.memory.type === 'food' && entity.memory.until > state.worldDays) best = getCellAt(entity.memory.x, entity.memory.y);
+    return best;
+  }
+
+  function nearestSunTarget(entity) {
+    const brain = brainProfile(entity.traits.intelligence);
+    let best = null;
+    let bestScore = -Infinity;
+    for (let i = 0; i < brain.searchSamples; i += 1) {
+      const cell = landCells[Math.floor(random() * landCells.length)];
+      if (!cell || cell.type === 'forest' || cell.type === 'rock') continue;
+      const score = terrainSpeed(cell.type) / (distance(entity, cell) + 50) + (cell.type === 'meadow' || cell.type === 'desert' ? 0.015 : 0);
       if (score > bestScore) {
         bestScore = score;
         best = cell;
@@ -1114,18 +1532,49 @@
     return best;
   }
 
+  function isValidPrey(entity, other) {
+    if (entity.kind === 'predator') return other.kind === 'grazer' || other.kind === 'alien';
+    if (entity.kind === 'alien') return other.kind === 'grazer';
+    return false;
+  }
+
   function nearestPrey(entity) {
     if (!dietRules(entity).canHunt) return null;
+    const brain = brainProfile(entity.traits.intelligence);
     let best = null;
-    let bestDistance = Infinity;
+    let bestScore = -Infinity;
     for (const other of state.entities) {
-      if (other === entity) continue;
-      const valid = entity.kind === 'predator' ? other.kind === 'grazer' || other.kind === 'alien' : entity.kind === 'alien' && other.kind === 'grazer';
-      if (!valid) continue;
+      if (other === entity || !isValidPrey(entity, other)) continue;
       const currentDistance = distance(entity, other);
-      if (currentDistance < bestDistance && currentDistance < 250) {
+      const hidden = 1 - entityVisibility(other);
+      const detection = (92 + entity.traits.perception * 2.45) * (1 - hidden * (1 - brain.camouflageAwareness * 0.72));
+      if (currentDistance > detection) continue;
+      const weakness = clamp(combatPower(entity) / Math.max(1, combatPower(other)), 0.25, 3);
+      const energyValue = other.traits.maxEnergy * 0.34;
+      const score = brain.riskAwareness < 0.25 ? -currentDistance : energyValue * Math.pow(weakness, brain.riskAwareness) / (currentDistance + 35);
+      if (score > bestScore) {
+        bestScore = score;
         best = other;
-        bestDistance = currentDistance;
+      }
+    }
+    if (best) entity.memory = { type: 'prey', id: best.id, x: best.x, y: best.y, until: state.worldDays + brain.memoryDays };
+    return best;
+  }
+
+  function nearestThreat(entity) {
+    const brain = brainProfile(entity.traits.intelligence);
+    let best = null;
+    let bestScore = -Infinity;
+    for (const other of state.entities) {
+      if (other === entity || !dietRules(other).canHunt || !isValidPrey(other, entity)) continue;
+      const currentDistance = distance(entity, other);
+      const detection = 58 + entity.traits.perception * (1.2 + brain.riskAwareness);
+      if (currentDistance > detection) continue;
+      const danger = combatPower(other) / Math.max(1, combatPower(entity));
+      const score = danger / Math.max(25, currentDistance);
+      if (score > bestScore) {
+        bestScore = score;
+        best = other;
       }
     }
     return best;
@@ -1144,51 +1593,123 @@
     return closest;
   }
 
-  function setEscapeTarget(entity, fire) {
-    const dx = entity.x - fire.x;
-    const dy = entity.y - fire.y;
+  function setEscapeTarget(entity, danger, reason) {
+    const dx = entity.x - danger.x;
+    const dy = entity.y - danger.y;
     const length = Math.hypot(dx, dy) || 1;
     entity.targetX = clamp(entity.x + dx / length * 190, 18, LOGICAL_WIDTH - 18);
     entity.targetY = clamp(entity.y + dy / length * 190, 18, LOGICAL_HEIGHT - 18);
-    if (!entity.fireAlertLoggedAt || state.worldDays - entity.fireAlertLoggedAt > 2.5) {
-      addEvent(entity.name + ' заметил огонь и отступает.', 'danger');
-      entity.fireAlertLoggedAt = state.worldDays;
+    setDecision(entity, 'flee', reason, 1, danger);
+  }
+
+  function decisionLabel(action, target) {
+    if (action === 'flee') return target && target.name ? 'убегает от ' + target.name : 'убегает от опасности';
+    if (action === 'forage') return 'ищет траву';
+    if (action === 'solar') return 'ищет освещённое место';
+    if (action === 'hunt') return target ? 'атакует слабую цель ' + target.name : 'ищет добычу';
+    if (action === 'reproduce') return 'готовится к делению';
+    if (action === 'rest') return 'восстанавливается';
+    return 'исследует новую область';
+  }
+
+  function setDecision(entity, action, reason, priority, target) {
+    const previous = entity.decision || {};
+    entity.decision = { action, reason, priority, targetId: target && target.id ? target.id : null, at: state.worldDays };
+    entity.stateLabel = decisionLabel(action, target);
+    const changed = previous.action !== action || previous.targetId !== entity.decision.targetId;
+    const important = entity.kind === 'alien' || entity.id === state.selectedId || entity.id === state.inspectedId;
+    if (changed && (important || random() < 0.055) && (!entity.decisionLogAt || state.worldDays - entity.decisionLogAt > 2.2)) {
+      addEvent(entity.name + ' ' + entity.stateLabel + ': ' + reason + '.', action === 'flee' ? 'danger' : action === 'hunt' ? 'combat' : 'decision');
+      entity.decisionLogAt = state.worldDays;
     }
-    entity.stateLabel = 'убегает от огня';
+  }
+
+  function reproductionReady(entity, danger) {
+    return entity.energy > entity.traits.maxEnergy * 0.74 && entity.health > entity.traits.maxHealth * 0.62 && entity.age > 18 && entity.reproTimer <= 0 && !danger;
+  }
+
+  function chooseExplorationTarget(entity) {
+    const brain = brainProfile(entity.traits.intelligence);
+    let best = null;
+    let bestScore = -Infinity;
+    const samples = Math.max(4, Math.floor(brain.searchSamples * 0.55));
+    for (let i = 0; i < samples; i += 1) {
+      const angle = random() * Math.PI * 2;
+      const radius = 65 + random() * (150 + brain.factors.length * 12);
+      const candidate = {
+        x: clamp(entity.x + Math.cos(angle) * radius, 18, LOGICAL_WIDTH - 18),
+        y: clamp(entity.y + Math.sin(angle) * radius, 18, LOGICAL_HEIGHT - 18)
+      };
+      if (!isHabitable(entity.kind, candidate.x, candidate.y)) continue;
+      const cell = getCellAt(candidate.x, candidate.y);
+      const score = brain.factors.length >= 8 ? terrainSpeed(cell.type) + cell.food / 120 : random();
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidate;
+      }
+    }
+    return best || { x: entity.x, y: entity.y };
   }
 
   function chooseAutonomousTarget(entity) {
-    const danger = nearestFireDanger(entity);
-    if (danger && state.worldDays >= entity.manualUntil) {
-      setEscapeTarget(entity, danger);
+    const energyRatio = entity.energy / Math.max(1, entity.traits.maxEnergy);
+    const brain = brainProfile(entity.traits.intelligence);
+    const fire = nearestFireDanger(entity);
+    if (fire) {
+      setEscapeTarget(entity, fire, 'огонь уже в зоне восприятия');
       return;
     }
 
-    if (dietRules(entity).canHunt) {
-      const prey = nearestPrey(entity);
-      if (prey && entity.energy < 82) {
-        entity.targetX = prey.x;
-        entity.targetY = prey.y;
-        entity.stateLabel = 'преследует добычу';
-        return;
-      }
+    const threat = nearestThreat(entity);
+    if (threat && (energyRatio > 0.16 || combatPower(threat) > combatPower(entity) * (1.05 + (1 - brain.riskAwareness) * 0.55))) {
+      setEscapeTarget(entity, threat, brain.riskAwareness > 0.45 ? 'противник сильнее, бой невыгоден' : 'рядом хищник');
+      return;
     }
 
-    if (dietRules(entity).canEatGrass && entity.energy < entity.traits.maxEnergy * 0.76) {
+    const hungry = energyRatio < 0.68;
+    if (hungry && dietRules(entity).canEatGrass) {
       const food = nearestFoodTarget(entity);
       if (food) {
         entity.targetX = food.x;
         entity.targetY = food.y;
-        entity.stateLabel = entity.kind === 'alien' ? 'ищет пищу и свет' : 'ищет траву';
+        setDecision(entity, 'forage', 'энергия ' + Math.round(energyRatio * 100) + '%, найден участок с пищей ' + Math.round(food.food), 2, food);
         return;
       }
     }
 
-    const angle = random() * Math.PI * 2;
-    const radius = 60 + random() * 190;
-    entity.targetX = clamp(entity.x + Math.cos(angle) * radius, 18, LOGICAL_WIDTH - 18);
-    entity.targetY = clamp(entity.y + Math.sin(angle) * radius, 18, LOGICAL_HEIGHT - 18);
-    entity.stateLabel = entity.kind === 'alien' ? 'исследует' : 'движется';
+    if (hungry && dietRules(entity).canSolar) {
+      const sun = nearestSunTarget(entity);
+      if (sun) {
+        entity.targetX = sun.x;
+        entity.targetY = sun.y;
+        setDecision(entity, 'solar', 'энергия ' + Math.round(energyRatio * 100) + '%, нужен открытый свет', 2, sun);
+        return;
+      }
+    }
+
+    if ((hungry || brain.riskAwareness > 0.55) && dietRules(entity).canHunt) {
+      const prey = nearestPrey(entity);
+      if (prey) {
+        entity.targetX = prey.x;
+        entity.targetY = prey.y;
+        const weakness = combatPower(entity) / Math.max(1, combatPower(prey));
+        const reason = brain.riskAwareness > 0.45 ? 'энергия ' + Math.round(energyRatio * 100) + '%, оценка силы цели ' + weakness.toFixed(1) + '×' : 'добыча ближе остальных';
+        setDecision(entity, 'hunt', reason, 3, prey);
+        return;
+      }
+    }
+
+    if (reproductionReady(entity, threat)) {
+      entity.targetX = entity.x;
+      entity.targetY = entity.y;
+      setDecision(entity, 'reproduce', 'энергии достаточно, рядом нет явной угрозы', 4, null);
+      return;
+    }
+
+    const destination = chooseExplorationTarget(entity);
+    entity.targetX = destination.x;
+    entity.targetY = destination.y;
+    setDecision(entity, 'explore', brain.factors.length >= 8 ? 'выбрана выгодная по биому и ресурсам область' : 'нет более срочной потребности', 6, null);
   }
 
   function terrainSpeed(type) {
@@ -1210,12 +1731,41 @@
     if (!cell || cell.type === 'forest' || cell.type === 'water') return;
     const gain = (0.68 * sunlight() * (state.weather === 'rain' ? 0.55 : 1)) * dt;
     entity.energy = clamp(entity.energy + gain * entity.traits.efficiency, 0, entity.traits.maxEnergy);
+    if (gain > 0.2) entity.stateLabel = 'поглощает свет';
+  }
+
+  function updateAbilityEffects(entity, dt) {
+    const cell = getCellAt(entity.x, entity.y);
+    const targetCoat = terrainAppearance[cell && cell.type] || terrainAppearance.meadow;
+    const baseCoat = normalizeCoat(entity.coat, archetypes[entity.kind].baseCoat);
+    const display = normalizeCoat(entity.displayCoat || baseCoat, baseCoat);
+    if (entity.abilities && entity.abilities.chameleon && entity.energy > entity.traits.maxEnergy * 0.12) {
+      const adaptation = clamp(dt * (0.5 + entity.traits.intelligence * 0.24), 0, 0.18);
+      display.hue = mixHue(display.hue, targetCoat.hue, adaptation);
+      display.saturation += (targetCoat.saturation - display.saturation) * adaptation;
+      display.lightness += (targetCoat.lightness - display.lightness) * adaptation;
+      entity.energy -= 0.11 * entity.traits.size * dt;
+    } else {
+      const recovery = clamp(dt * 0.3, 0, 0.12);
+      display.hue = mixHue(display.hue, baseCoat.hue, recovery);
+      display.saturation += (baseCoat.saturation - display.saturation) * recovery;
+      display.lightness += (baseCoat.lightness - display.lightness) * recovery;
+    }
+    entity.displayCoat = normalizeCoat(display, baseCoat);
+
+    if (entity.abilities && entity.abilities.regeneration && entity.health < entity.traits.maxHealth * 0.96 && entity.energy > entity.traits.maxEnergy * 0.48) {
+      const healing = Math.min(entity.traits.maxHealth - entity.health, 1.15 * entity.traits.constitution * dt);
+      entity.health += healing;
+      entity.energy -= healing * 0.72;
+      if (entity.decision && entity.decision.action === 'rest') entity.stateLabel = 'регенерирует';
+    }
   }
 
   function moveEntity(entity, dt) {
-    const base = archetypes[entity.kind];
     const type = terrainTypeAt(entity.x, entity.y);
-    const speed = entity.traits.maxSpeed * terrainSpeed(type);
+    const action = entity.decision && entity.decision.action;
+    const sprinting = Boolean(entity.abilities && entity.abilities.sprint && (action === 'flee' || action === 'hunt') && entity.energy > entity.traits.maxEnergy * 0.2);
+    const speed = entity.traits.maxSpeed * terrainSpeed(type) * (sprinting ? 1.48 : 1);
     const dx = entity.targetX - entity.x;
     const dy = entity.targetY - entity.y;
     const length = Math.hypot(dx, dy) || 1;
@@ -1223,7 +1773,7 @@
     const moved = Math.min(stepDistance, length);
     entity.x = clamp(entity.x + dx / length * moved, 14, LOGICAL_WIDTH - 14);
     entity.y = clamp(entity.y + dy / length * moved, 14, LOGICAL_HEIGHT - 14);
-    entity.energy -= moved * entity.traits.movementCost;
+    entity.energy -= moved * entity.traits.movementCost * (sprinting ? 1.72 : 1);
     if (length < 15 || random() < dt * 0.025) entity.thinkTimer = 0;
   }
 
@@ -1237,11 +1787,15 @@
       attacker.targetY = target.y;
       if (attacker.attackTimer > 0 || attacker.energy < attacker.traits.attackCost) continue;
       const armorFactor = 1 - clamp(target.traits.armor - 1, -0.45, 0.72) * 0.42;
-      const damage = attacker.traits.damage * (0.88 + attacker.traits.strength * 0.12) * armorFactor;
+      const venomMultiplier = attacker.abilities && attacker.abilities.venom ? 1.3 : 1;
+      const attackCost = attacker.traits.attackCost * (attacker.abilities && attacker.abilities.venom ? 1.2 : 1);
+      const damage = attacker.traits.damage * (0.88 + attacker.traits.strength * 0.12) * armorFactor * venomMultiplier;
+      if (attacker.energy < attackCost) continue;
       target.health -= damage;
-      attacker.energy -= attacker.traits.attackCost;
+      attacker.energy -= attackCost;
       attacker.attackTimer = attacker.traits.attackCooldown;
       target.stateLabel = 'атакован';
+      target.thinkTimer = 0;
       if (attacker.id === state.selectedId || !attacker.attackLogAt || state.worldDays - attacker.attackLogAt > 4) {
         addEvent(attacker.name + ' атакует ' + target.name + ' (' + Math.round(damage) + ' урона).', 'combat');
         attacker.attackLogAt = state.worldDays;
@@ -1254,6 +1808,7 @@
         if (state.selectedId === target.id) state.selectedId = null;
         if (state.inspectedId === target.id) state.inspectedId = null;
         attacker.energy = clamp(attacker.energy + target.traits.maxEnergy * 0.34, 0, attacker.traits.maxEnergy);
+        state.deaths += 1;
         addEvent(attacker.name + ' уничтожил ' + targetName + '.', 'death');
       }
     }
@@ -1266,13 +1821,14 @@
       entity.pulse += dt * 2.3;
       entity.reproTimer -= dt;
       entity.thinkTimer -= dt;
-      const danger = nearestFireDanger(entity);
-      if (danger && state.worldDays >= entity.manualUntil) setEscapeTarget(entity, danger);
+      const fireDanger = nearestFireDanger(entity);
+      if (fireDanger && state.worldDays >= entity.manualUntil) setEscapeTarget(entity, fireDanger, 'огонь уже слишком близко');
       else if (entity.thinkTimer <= 0 && state.worldDays >= entity.manualUntil) {
         chooseAutonomousTarget(entity);
-        entity.thinkTimer = (1.3 + random() * 2.5) / Math.max(0.55, entity.traits.intelligence);
+        entity.thinkTimer = (1.1 + random() * 2.2) / Math.max(0.55, entity.traits.intelligence);
       }
 
+      updateAbilityEffects(entity, dt);
       moveEntity(entity, dt);
       consumeGrass(entity, dt);
       solarGain(entity, dt);
@@ -1281,32 +1837,38 @@
       entity.energy -= entity.traits.metabolism * dt;
       if (cell && cell.type === 'desert') entity.energy -= 0.18 * dt;
       if (state.weather === 'snow' && cell && cell.type !== 'snow') entity.energy -= 0.08 * dt;
-      if (danger && distance(entity, danger) < danger.radius + 8) {
-        entity.health -= (8.5 + danger.radius * 0.055) * dt / entity.traits.fireResistance;
+      if (fireDanger && distance(entity, fireDanger) < fireDanger.radius + 8) {
+        entity.health -= (8.5 + fireDanger.radius * 0.055) * dt / entity.traits.fireResistance;
         entity.energy -= 1.6 * dt / entity.traits.fireResistance;
         entity.stateLabel = 'горит';
       }
+      if (entity.age > entity.traits.maxAge) entity.health -= (0.32 + (entity.age - entity.traits.maxAge) / 260) * dt;
       if (entity.energy <= 0) entity.health -= 4.2 * dt;
       if (entity.health <= 0) {
-        const deathReason = danger && distance(entity, danger) < danger.radius + 8 ? 'сгорел' : entity.energy <= 0 ? 'умер от истощения' : 'погиб в столкновении';
+        const deathReason = fireDanger && distance(entity, fireDanger) < fireDanger.radius + 8 ? 'сгорел' : entity.energy <= 0 ? 'умер от истощения' : entity.age > entity.traits.maxAge ? 'умер от старости' : 'погиб в столкновении';
         const index = state.entities.indexOf(entity);
         if (index >= 0) state.entities.splice(index, 1);
         if (state.selectedId === entity.id) state.selectedId = null;
         if (state.inspectedId === entity.id) state.inspectedId = null;
+        state.deaths += 1;
         addEvent(entity.name + ' ' + deathReason + '.', 'death');
         continue;
       }
 
-      if (entity.energy > entity.traits.maxEnergy * 0.8 && entity.health > entity.traits.maxHealth * 0.52 && entity.age > 18 && entity.reproTimer <= 0 && !danger && state.entities.filter((other) => other.kind === entity.kind).length < base.maxPopulation && random() < dt * 0.05 * entity.traits.fertility) {
+      const wantsToReproduce = entity.decision && entity.decision.action === 'reproduce';
+      if (wantsToReproduce && reproductionReady(entity, nearestThreat(entity)) && state.entities.filter((other) => other.kind === entity.kind).length < base.maxPopulation && random() < dt * 0.24 * entity.traits.fertility) {
         const child = spawn(entity.kind, entity.x + (random() - 0.5) * 38, entity.y + (random() - 0.5) * 38, entity);
         if (child) {
           entity.energy -= entity.traits.reproductionCost;
           entity.reproTimer = entity.traits.reproductionCooldown / Math.max(0.55, entity.traits.fertility);
-          if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение: ' + child.name + ' от ' + entity.name + '.', 'birth');
+          entity.thinkTimer = 0;
+          state.births += 1;
+          if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение ' + child.generation + ': ' + child.name + ' от ' + entity.name + '. Цвет и признаки унаследованы с мутацией до 10%.', 'birth');
         }
       }
     }
     updateCombat(dt);
+    state.peakAlienPopulation = Math.max(state.peakAlienPopulation, countSpecies().alien);
   }
 
   function isBurnable(cell) {
@@ -1407,18 +1969,42 @@
     state.fires = state.fires.filter((fire) => !fire.endReason);
   }
 
-  function updateGameState() {
+  function finishGame(outcome, reason) {
+    if (state.gameStatus !== 'playing') return;
     const counts = countSpecies();
     const currentTerritory = computeTerritory();
-    if (state.gameStatus === 'playing' && counts.alien === 0 && state.deployedCount > 0) {
-      state.gameStatus = 'lost';
-      addEvent('Колония вымерла.', 'death');
-    } else if (state.gameStatus === 'playing' && state.goal === 'survival' && state.worldDays - state.goalStartDay >= SURVIVAL_DAYS) {
-      state.gameStatus = 'won';
-      addEvent('ÐšÐ¾Ð»Ð¾Ð½Ð¸Ñ Ð¿Ñ€Ð¾Ð¶Ð¸Ð»Ð° Ð³Ð¾Ð´ Ð¸ Ð¿ÐµÑ€ÐµÐ¶Ð¸Ð»Ð° Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ñ†Ð¸ÐºÐ».', 'system');
-    } else if (state.gameStatus === 'playing' && state.goal === 'conquest' && currentTerritory >= TARGET_TERRITORY) {
-      state.gameStatus = 'won';
-      addEvent('Колония закрепилась на острове.', 'system');
+    state.gameStatus = outcome;
+    state.result = {
+      outcome,
+      goal: state.goal,
+      reason,
+      days: Math.max(0, Math.floor(state.worldDays - state.goalStartDay)),
+      territory: currentTerritory,
+      population: counts.alien,
+      peakPopulation: state.peakAlienPopulation,
+      births: state.births,
+      deaths: state.deaths
+    };
+    addEvent(reason, outcome === 'won' ? 'result' : 'death');
+    save();
+  }
+
+  function updateGameState(dt) {
+    const counts = countSpecies();
+    const currentTerritory = computeTerritory();
+    if (state.gameStatus !== 'playing') return;
+    if (counts.alien === 0 && state.deployedCount > 0) {
+      finishGame('lost', 'Колония вымерла: на острове не осталось ни одного пришельца.');
+      return;
+    }
+    if (state.goal === 'survival' && counts.alien > 0 && state.worldDays - state.goalStartDay >= SURVIVAL_DAYS) {
+      finishGame('won', 'Колония прожила полный год и сохранила жизнеспособную популяцию.');
+      return;
+    }
+    if (state.goal === 'conquest') {
+      if (currentTerritory >= TARGET_TERRITORY && counts.alien > 0) state.conquestHoldDays += dt;
+      else state.conquestHoldDays = Math.max(0, state.conquestHoldDays - dt * 1.5);
+      if (state.conquestHoldDays >= CONQUEST_HOLD_DAYS) finishGame('won', 'Колония заняла ' + currentTerritory + '% суши и удержала влияние ' + CONQUEST_HOLD_DAYS + ' дней.');
     }
   }
 
@@ -1429,7 +2015,7 @@
     regrowFood(dt);
     updateFires(dt);
     updateEntities(dt);
-    updateGameState();
+    updateGameState(dt);
   }
 
   function advanceOffline(seconds) {
@@ -1450,7 +2036,7 @@
     if (state.deployArmed) {
       mapHint.textContent = 'Высадка: нажмите на сушу, чтобы выпустить организм';
     } else if (mode === 'god') {
-      mapHint.textContent = 'Бог: нажмите на сушу, чтобы поджечь её';
+      mapHint.textContent = 'Бог: нажмите для осмотра, Shift+клик — пожар';
     } else {
       mapHint.textContent = 'Существо: выберите зелёного пришельца, затем точку назначения';
     }
@@ -1496,21 +2082,33 @@
     const entity = inspectedEntity();
     if (entity) {
       const dietLabels = { native: 'местный вид', herbivore: 'травоядный', omnivore: 'всеядный', carnivore: 'хищный', solar: 'фотосинтез' };
+      const brain = brainProfile(entity.traits.intelligence);
+      const currentCell = getCellAt(entity.x, entity.y);
       addInspectorHeading(entity.name, archetypes[entity.kind].label + (entity.kind === 'alien' ? ' · колония' : ' · коренной вид'));
       addInspectorRow('Состояние', entity.stateLabel);
+      addInspectorRow('Решение', decisionLabel(entity.decision && entity.decision.action, state.entities.find((other) => entity.decision && other.id === entity.decision.targetId)));
+      addInspectorRow('Причина', entity.decision && entity.decision.reason ? entity.decision.reason : 'реакция на ближайший стимул');
       addInspectorRow('Питание', dietLabels[entity.diet] || entity.diet);
+      addInspectorRow('Поколение', String(entity.generation || 0));
       addInspectorRow('Сила', entity.traits.strength.toFixed(2));
       addInspectorRow('Ловкость', entity.traits.agility.toFixed(2));
       addInspectorRow('Конституция', entity.traits.constitution.toFixed(2));
       addInspectorRow('Интеллект', entity.traits.intelligence.toFixed(2));
       addInspectorRow('Размер', entity.traits.size.toFixed(2));
       addInspectorRow('Броня', entity.traits.armor.toFixed(2));
+      addInspectorRow('Маскировка', entity.traits.camouflage.toFixed(2));
       addInspectorRow('Здоровье', Math.round(entity.health) + ' / ' + Math.round(entity.traits.maxHealth));
       addInspectorRow('Энергия', Math.round(entity.energy) + ' / ' + Math.round(entity.traits.maxEnergy));
-      addInspectorRow('Скорость', Math.round(entity.traits.maxSpeed) + ' ед/с');
+      addInspectorRow('Скорость', Math.round(entity.traits.maxSpeed) + (entity.abilities.sprint ? ' · рывок ' + Math.round(entity.traits.maxSpeed * 1.48) : '') + ' ед/с');
       addInspectorRow('Метаболизм', entity.traits.metabolism.toFixed(2) + ' /с');
-      addInspectorRow('Урон', Math.round(entity.traits.damage));
+      addInspectorRow('Урон', Math.round(entity.traits.damage * (entity.abilities.venom ? 1.3 : 1)));
       addInspectorRow('Обзор', Math.round(entity.traits.perception));
+      addInspectorRow('Мозг', brain.tier + ' · ' + brain.factors.length + ' ' + factorWord(brain.factors.length));
+      addInspectorRow('Учитывает', brain.factors.join(', '));
+      addInspectorRow('Покров', hslToHex(entity.coat).toUpperCase());
+      addInspectorRow('Слияние с биомом', Math.round(coatMatch(entity, currentCell) * 100) + '%');
+      addInspectorRow('Заметность', Math.round(entityVisibility(entity) * 100) + '%');
+      addInspectorRow('Способности', abilityLabels(entity.abilities).join(', ') || 'нет');
       addInspectorRow('Деление', Math.round(entity.traits.reproductionCooldown) + 'с');
       return;
     }
@@ -1539,8 +2137,17 @@
     inspectorContent.appendChild(empty);
   }
 
+  function loadGenomeTemplate(templateName, announce) {
+    const template = genomeTemplates[templateName] || genomeTemplates.balanced;
+    state.draftGenome = cloneGenome(template);
+    if (announce) addEvent('Загружен шаблон «' + templateSelect.options[templateSelect.selectedIndex].text + '». Его можно изменять перед высадкой.', 'control');
+    updateConstructorUI();
+    updateHud();
+  }
+
   function updateConstructorUI() {
-    const draft = state.draftGenome || state.genome;
+    const draft = cloneGenome(state.draftGenome || state.genome);
+    state.draftGenome = draft;
     for (const name of geneNames) {
       const value = clamp(Number(draft[name]) || 1, 0.35, 2.5);
       draft[name] = value;
@@ -1548,13 +2155,47 @@
       geneValueLabels[name].textContent = value.toFixed(2);
     }
     dietSelect.value = draft.diet;
+    coatColorInput.value = hslToHex(draft.coat);
+    for (const name of Object.keys(abilityInputs)) abilityInputs[name].checked = Boolean(draft.abilities[name]);
     const preview = deriveStatsFromGenes('alien', draft);
-    derivedStats.textContent = 'Здоровье ' + Math.round(preview.maxHealth) + ' · энергия ' + Math.round(preview.maxEnergy) + ' · скорость ' + Math.round(preview.maxSpeed) + ' · расход ' + preview.metabolism.toFixed(2) + '/с · урон ' + Math.round(preview.damage) + ' · обзор ' + Math.round(preview.perception) + ' · деление ' + Math.round(preview.reproductionCooldown) + 'с';
+    const brain = brainProfile(preview.intelligence);
+    const abilityDamage = draft.abilities.venom ? preview.damage * 1.3 : preview.damage;
+    const sprintSpeed = draft.abilities.sprint ? preview.maxSpeed * 1.48 : preview.maxSpeed;
+    derivedStats.textContent = 'Здоровье ' + Math.round(preview.maxHealth) + ' · энергия ' + Math.round(preview.maxEnergy) + ' · скорость ' + Math.round(preview.maxSpeed) + (draft.abilities.sprint ? ' (рывок ' + Math.round(sprintSpeed) + ')' : '') + ' · расход ' + preview.metabolism.toFixed(2) + '/с · урон ' + Math.round(abilityDamage) + ' · обзор ' + Math.round(preview.perception) + ' · маскировка ' + preview.camouflageEffect.toFixed(2) + ' · деление ' + Math.round(preview.reproductionCooldown) + 'с';
+    brainGuide.textContent = 'Мозг: ' + brain.tier + '. Учитывает ' + brain.factors.length + ' ' + factorWord(brain.factors.length) + ': ' + brain.factors.join(', ') + '. Мутация каждого числового признака у потомка — до ±10%.';
     const cost = genomeCost(draft);
+    const alienCount = countSpecies().alien;
+    const applyCost = alienCount ? Math.ceil(cost * 0.18 * alienCount) : 0;
     genomeCostText.textContent = 'Стоимость: ' + cost + ' · Очки: ' + Math.floor(state.points);
     deployGenomeButton.disabled = state.gameStatus !== 'playing' || state.points < cost;
     deployGenomeButton.textContent = state.deployArmed ? 'Выберите место…' : 'Высадить на карту';
     deployGenomeButton.setAttribute('aria-pressed', String(state.deployArmed));
+    applyGenomeButton.textContent = alienCount ? 'Применить к колонии (' + applyCost + ')' : 'Сохранить геном колонии';
+    applyGenomeButton.disabled = state.gameStatus !== 'playing' || state.points < applyCost;
+    applyGenomeButton.dataset.cost = String(applyCost);
+  }
+
+  function updateEndScreen() {
+    if (state.gameStatus === 'playing') {
+      endScreen.hidden = true;
+      return;
+    }
+    const result = state.result || {
+      outcome: state.gameStatus,
+      goal: state.goal,
+      reason: state.gameStatus === 'won' ? 'Эксперимент завершён успешно.' : 'Колония не пережила эксперимент.',
+      days: Math.max(0, Math.floor(state.worldDays - state.goalStartDay)),
+      territory: computeTerritory(),
+      population: countSpecies().alien,
+      peakPopulation: state.peakAlienPopulation,
+      births: state.births,
+      deaths: state.deaths
+    };
+    endScreen.hidden = false;
+    resultKicker.textContent = result.outcome === 'won' ? 'Эксперимент успешен' : 'Эксперимент завершён';
+    resultTitle.textContent = result.outcome === 'won' ? (result.goal === 'survival' ? 'Колония пережила год' : 'Остров закреплён') : 'Колония вымерла';
+    resultText.textContent = result.reason;
+    resultStats.textContent = 'Дней: ' + result.days + ' · территория: ' + result.territory + '% · популяция: ' + result.population + ' · максимум: ' + result.peakPopulation + ' · рождений: ' + result.births + ' · смертей: ' + result.deaths;
   }
 
   function updateHud() {
@@ -1583,12 +2224,12 @@
       objectiveProgress.textContent = survivedDays + ' / ' + SURVIVAL_DAYS + ' дней';
     } else {
       objectiveText.textContent = 'Закрепиться на острове и занять ' + TARGET_TERRITORY + '% суши';
-      objectiveProgress.textContent = currentTerritory + ' / ' + TARGET_TERRITORY + '%';
+      objectiveProgress.textContent = currentTerritory + ' / ' + TARGET_TERRITORY + '% · удержание ' + Math.floor(state.conquestHoldDays) + ' / ' + CONQUEST_HOLD_DAYS + ' дней';
     }
     weatherBadge.textContent = state.weather === 'rain' ? '☂ Дождь' : state.weather === 'snow' ? '❄ Снег' : (isDaytime() ? '☀ Ясно' : '◐ Ночь');
     speedButton.textContent = 'Скорость ' + speeds[state.speedIndex] + '×';
     if (state.deployArmed) mapHint.textContent = 'Высадка: нажмите на сушу, чтобы выпустить организм';
-    else if (state.mode === 'god') mapHint.textContent = 'Бог: нажмите на сушу, чтобы поджечь её';
+    else if (state.mode === 'god') mapHint.textContent = 'Бог: нажмите для осмотра, Shift+клик — пожар';
     else mapHint.textContent = 'Существо: выберите зелёного пришельца, затем точку назначения';
 
     if (selected) {
@@ -1599,12 +2240,13 @@
     }
     renderInspector();
 
-    if (state.gameStatus === 'won') status.textContent = 'Победа: колония заняла достаточно территории.';
+    if (state.gameStatus === 'won') status.textContent = state.goal === 'survival' ? 'Победа: колония пережила полный год.' : 'Победа: колония удержала достаточно территории.';
     else if (state.gameStatus === 'lost') status.textContent = 'Поражение: колония исчезла.';
     else if (counts.alien === 0 && state.deployedCount === 0) status.textContent = 'Сконструируйте организм и выберите место высадки на карте.';
     else if (selected && state.mode === 'creature') status.textContent = 'Вы управляете ' + selected.name + '. Тапните по карте, чтобы задать направление.';
     else if (state.mode === 'creature') status.textContent = 'Выберите зелёного пришельца, чтобы войти в его тело.';
     else status.textContent = state.events[0] ? state.events[0].text : 'Колония ищет пищу и расширяет территорию.';
+    updateEndScreen();
   }
 
   function resizeCanvas() {
@@ -1723,13 +2365,15 @@
 
   function drawEntity(entity, c) {
     const base = archetypes[entity.kind];
-    const color = entity.kind === 'alien' ? c.alien : entity.kind === 'grazer' ? c.grazer : c.predator;
+    const speciesColor = entity.kind === 'alien' ? c.alien : entity.kind === 'grazer' ? c.grazer : c.predator;
+    const coat = normalizeCoat(entity.displayCoat || entity.coat, base.baseCoat);
+    const color = 'hsl(' + Math.round(coat.hue) + ' ' + Math.round(coat.saturation) + '% ' + Math.round(coat.lightness) + '%)';
     const radius = base.baseSize * entity.traits.size * 6.5 + Math.sin(entity.pulse) * 0.8;
     const isSelected = entity.id === state.selectedId;
 
     if (isSelected) {
       ctx.globalAlpha = 0.24;
-      ctx.strokeStyle = c.alien;
+      ctx.strokeStyle = speciesColor;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(entity.x, entity.y, radius + 10, 0, Math.PI * 2);
@@ -1737,7 +2381,7 @@
       ctx.globalAlpha = 1;
     }
 
-    ctx.globalAlpha = entity.kind === 'alien' ? 0.94 : 0.78;
+    ctx.globalAlpha = clamp(0.68 + entityVisibility(entity) * 0.28, 0.7, 0.96);
     ctx.fillStyle = color;
     ctx.beginPath();
     if (base.shape === 'alien') {
@@ -1751,6 +2395,15 @@
       ctx.arc(entity.x, entity.y, radius, 0, Math.PI * 2);
     }
     ctx.fill();
+
+    if (entity.abilities && entity.abilities.chameleon) {
+      ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = speciesColor;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([2.5, 2.5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     ctx.globalAlpha = 0.92;
     ctx.fillStyle = c.bg;
@@ -1838,7 +2491,7 @@
     }
     state.points -= cost;
     state.deployedCount += 1;
-    state.genome = { ...draft, diet: draft.diet };
+    state.genome = cloneGenome(draft);
     if (state.deployedCount === 1) state.goalStartDay = state.worldDays;
     state.gameStatus = 'playing';
     state.selectedId = entity.id;
@@ -1846,7 +2499,9 @@
     state.selectedCell = null;
     state.deployArmed = false;
     entity.manualUntil = state.worldDays + 2.8;
-    addEvent(entity.name + ' высажен. Потрачено ' + cost + ' очков.', 'birth');
+    const brain = brainProfile(entity.traits.intelligence);
+    const abilities = abilityLabels(entity.abilities);
+    addEvent(entity.name + ' высажен. Потрачено ' + cost + ' очков. Мозг: ' + brain.tier + ', факторов: ' + brain.factors.length + (abilities.length ? ', способности: ' + abilities.join(', ') : '') + '.', 'birth');
     updateConstructorUI();
     updateHud();
   }
@@ -1895,10 +2550,33 @@
     }
   }
 
+  function startNewExperiment() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (_) {
+      // A fresh in-memory experiment is still possible when storage is blocked.
+    }
+    state.rng = (Date.now() ^ 0x5f3759df) >>> 0;
+    state.goal = 'conquest';
+    state.genome = cloneGenome(genomeTemplates.balanced);
+    state.draftGenome = cloneGenome(genomeTemplates.balanced);
+    templateSelect.value = 'balanced';
+    buildTerrain();
+    createInitialWorld();
+    updateConstructorUI();
+    setMode('god');
+    renderLog();
+    updateHud();
+    resizeCanvas();
+    save();
+  }
+
   goalSelect.addEventListener('change', () => {
     state.goal = goalSelect.value === 'survival' ? 'survival' : 'conquest';
     state.goalStartDay = state.worldDays;
+    state.conquestHoldDays = 0;
     state.gameStatus = 'playing';
+    state.result = null;
     addEvent(state.goal === 'survival' ? 'Цель изменена: пережить год.' : 'Цель изменена: занять территорию.', 'control');
     updateHud();
   });
@@ -1910,6 +2588,15 @@
     state.draftGenome.diet = dietSelect.value;
     updateConstructorUI();
   });
+  coatColorInput.addEventListener('input', () => {
+    state.draftGenome.coat = hexToHsl(coatColorInput.value);
+    updateConstructorUI();
+  });
+  Object.entries(abilityInputs).forEach(([name, input]) => input.addEventListener('change', () => {
+    state.draftGenome.abilities[name] = input.checked;
+    updateConstructorUI();
+  }));
+  loadTemplateButton.addEventListener('click', () => loadGenomeTemplate(templateSelect.value, true));
   deployGenomeButton.addEventListener('click', () => {
     const cost = genomeCost(state.draftGenome);
     if (state.points < cost || state.gameStatus !== 'playing') return;
@@ -1918,20 +2605,32 @@
     updateHud();
   });
   applyGenomeButton.addEventListener('click', () => {
-    state.genome = { ...state.draftGenome, diet: dietSelect.value };
+    const applyCost = Math.max(0, Number(applyGenomeButton.dataset.cost) || 0);
+    if (state.points < applyCost || state.gameStatus !== 'playing') {
+      addEvent('Недостаточно очков для изменения всей живой колонии.', 'control');
+      updateHud();
+      return;
+    }
+    state.points -= applyCost;
+    state.genome = cloneGenome({ ...state.draftGenome, diet: dietSelect.value });
     for (const entity of state.entities) {
       if (entity.kind !== 'alien') continue;
       const healthRatio = clamp(entity.health / Math.max(1, entity.traits.maxHealth), 0, 1);
       const energyRatio = clamp(entity.energy / Math.max(1, entity.traits.maxEnergy), 0, 1);
       entity.traits = deriveStatsFromGenes('alien', state.genome);
       entity.diet = state.genome.diet;
+      entity.coat = normalizeCoat(state.genome.coat, archetypes.alien.baseCoat);
+      entity.displayCoat = { ...entity.coat };
+      entity.abilities = normalizeAbilities(state.genome.abilities);
       entity.health = entity.traits.maxHealth * healthRatio;
       entity.energy = entity.traits.maxEnergy * energyRatio;
+      entity.thinkTimer = 0;
     }
-    addEvent('Геном колонии обновлён: ' + state.genome.diet + '.', 'control');
+    addEvent('Геном колонии обновлён за ' + applyCost + ' очков: ' + state.genome.diet + ', покров ' + hslToHex(state.genome.coat).toUpperCase() + ', способности: ' + (abilityLabels(state.genome.abilities).join(', ') || 'нет') + '.', 'control');
     updateConstructorUI();
     updateHud();
   });
+  newExperimentButton.addEventListener('click', startNewExperiment);
   modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.ecoMode)));
   speedButton.addEventListener('click', () => {
     state.speedIndex = (state.speedIndex + 1) % speeds.length;
@@ -2015,7 +2714,7 @@
   if (!welcome || !game || !start) return;
 
   try {
-    if (localStorage.getItem('amoebas-ecosystem-game-v3')) {
+    if (localStorage.getItem('amoebas-ecosystem-game-v4')) {
       start.textContent = 'Продолжить игру';
       note.textContent = 'Локальное сохранение найдено';
     }
