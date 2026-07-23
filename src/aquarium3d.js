@@ -42,9 +42,18 @@ function createLineGeometry(points) {
   return geometry;
 }
 
+function createPointGeometry(points) {
+  const positions = [];
+  for (const point of points) positions.push(point.x, point.y, point.z);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  return geometry;
+}
+
 export class Aquarium3D {
   constructor(canvas, options = {}) {
     this.canvas = canvas;
+    this.previewMode = Boolean(options.previewMode);
     this.simWidth = options.simWidth || 1200;
     this.simDepth = options.simDepth || 750;
     this.simHeight = options.simHeight || 420;
@@ -69,7 +78,7 @@ export class Aquarium3D {
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
-      alpha: false,
+      alpha: this.previewMode,
       powerPreference: "high-performance",
       preserveDrawingBuffer: false
     });
@@ -79,22 +88,24 @@ export class Aquarium3D {
     this.renderer.setPixelRatio(Math.min(1.6, window.devicePixelRatio || 1));
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x04151c);
-    this.scene.fog = new THREE.FogExp2(0x0b3540, 0.016);
+    this.scene.background = this.previewMode ? null : new THREE.Color(0x04151c);
+    this.scene.fog = this.previewMode ? null : new THREE.FogExp2(0x0b3540, 0.016);
 
-    this.camera = new THREE.PerspectiveCamera(43, 1, 0.1, 180);
-    this.camera.position.set(39, 24, 36);
+    this.camera = new THREE.PerspectiveCamera(this.previewMode ? 34 : 43, 1, 0.1, 180);
+    this.camera.position.set(this.previewMode ? 4.8 : 39, this.previewMode ? 3.1 : 24, this.previewMode ? 5.8 : 36);
 
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.075;
-    this.controls.target.set(0, 6.2, 0);
-    this.controls.minDistance = 19;
-    this.controls.maxDistance = 78;
+    this.controls.target.set(0, this.previewMode ? 0.9 : 6.2, 0);
+    this.controls.minDistance = this.previewMode ? 4.4 : 19;
+    this.controls.maxDistance = this.previewMode ? 10 : 78;
     this.controls.minPolarAngle = 0.22;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.enablePan = true;
+    this.controls.enablePan = !this.previewMode;
     this.controls.screenSpacePanning = false;
+    this.controls.autoRotate = this.previewMode;
+    this.controls.autoRotateSpeed = 0.75;
     this.controls.touches.ONE = THREE.TOUCH.ROTATE;
     this.controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
 
@@ -109,6 +120,16 @@ export class Aquarium3D {
 
     this.shared = this.createSharedGeometry();
     this.createLights();
+    if (this.previewMode) {
+      this.ambientLight.intensity = 1.9;
+      this.topLight.intensity = 3.8;
+      this.topLight.position.set(-4, 8, 5);
+      this.rimLight.intensity = 18;
+      this.rimLight.position.set(4, 3, -4);
+      this.warmLight.intensity = 7;
+      this.warmLight.position.set(-4, 1, 4);
+      return;
+    }
     this.createTank();
     this.createWaterSurface();
     this.createBubbles();
@@ -211,6 +232,52 @@ export class Aquarium3D {
       ]);
     }
 
+    const makeRingSegments = (target, x, radiusY, radiusZ, segments = 24) => {
+      for (let index = 0; index < segments; index += 1) {
+        const angle = index / segments * TAU;
+        const nextAngle = (index + 1) / segments * TAU;
+        target.push([
+          new THREE.Vector3(x, Math.cos(angle) * radiusY, Math.sin(angle) * radiusZ),
+          new THREE.Vector3(x, Math.cos(nextAngle) * radiusY, Math.sin(nextAngle) * radiusZ)
+        ]);
+      }
+    };
+
+    const armorCage = [];
+    for (const x of [-1.12, -0.56, 0, 0.56, 1.12]) makeRingSegments(armorCage, x, 0.68, 0.78, 20);
+    for (let side = 0; side < 8; side += 1) {
+      const angle = side / 8 * TAU;
+      for (let section = 0; section < 4; section += 1) {
+        const x0 = -1.12 + section * 0.56;
+        const x1 = x0 + 0.56;
+        armorCage.push([
+          new THREE.Vector3(x0, Math.cos(angle) * 0.68, Math.sin(angle) * 0.78),
+          new THREE.Vector3(x1, Math.cos(angle) * 0.68, Math.sin(angle) * 0.78)
+        ]);
+      }
+    }
+
+    const patternStripes = [];
+    for (const x of [-0.78, -0.26, 0.26, 0.78]) makeRingSegments(patternStripes, x, 0.72, 0.8, 22);
+
+    const patternRings = [];
+    makeRingSegments(patternRings, 0, 0.96, 1.02, 28);
+    for (let index = 0; index < 28; index += 1) {
+      const angle = index / 28 * TAU;
+      const nextAngle = (index + 1) / 28 * TAU;
+      patternRings.push([
+        new THREE.Vector3(Math.cos(angle) * 1.2, Math.sin(angle) * 0.74, 0),
+        new THREE.Vector3(Math.cos(nextAngle) * 1.2, Math.sin(nextAngle) * 0.74, 0)
+      ]);
+    }
+
+    const patternSpots = [];
+    for (let index = 0; index < 18; index += 1) {
+      const x = -0.92 + index % 6 * 0.36;
+      const angle = Math.floor(index / 6) / 3 * TAU + (index % 2) * 0.32;
+      patternSpots.push(new THREE.Vector3(x, Math.cos(angle) * 0.62, Math.sin(angle) * 0.72));
+    }
+
     const predatorRibs = [];
     for (let index = 0; index < 7; index += 1) {
       const x = -1.02 + index * 0.31;
@@ -237,8 +304,14 @@ export class Aquarium3D {
       ciliateCilia: createLineGeometry(ciliateCilia),
       flagella: createLineGeometry(flagella),
       radiolarianSpikes: createLineGeometry(radiolarianSpikes),
+      armorCage: createLineGeometry(armorCage),
+      patternStripes: createLineGeometry(patternStripes),
+      patternRings: createLineGeometry(patternRings),
+      patternSpots: createPointGeometry(patternSpots),
       predatorRibs: createLineGeometry(predatorRibs),
       mandible: new THREE.ConeGeometry(0.12, 0.68, 7),
+      venomGland: new THREE.SphereGeometry(0.2, 10, 7),
+      regenerationRing: new THREE.TorusGeometry(1.22, 0.035, 7, 42),
       halo: new THREE.TorusGeometry(1.48, 0.035, 7, 42),
       trail: new THREE.ConeGeometry(0.44, 2.4, 10, 1, true),
       bubble: new THREE.SphereGeometry(0.07, 7, 5),
@@ -612,18 +685,50 @@ export class Aquarium3D {
     return color;
   }
 
+  accentColor(entity) {
+    const accent = entity.appearance?.accent || { hue: 268, saturation: 68, lightness: 72 };
+    const color = new THREE.Color();
+    color.setHSL(
+      (((Number(accent.hue) || 0) % 360) + 360) % 360 / 360,
+      clamp((Number(accent.saturation) || 0) / 100, 0, 1),
+      clamp((Number(accent.lightness) || 50) / 100, 0.08, 0.92),
+      THREE.SRGBColorSpace
+    );
+    return color;
+  }
+
+  appearanceFor(entity) {
+    const source = entity.appearance || {};
+    return {
+      elongation: clamp(Number(source.elongation) || 1, 0.65, 1.55),
+      bulk: clamp(Number(source.bulk) || 1, 0.65, 1.55),
+      appendages: clamp(Number(source.appendages) || 1, 0.4, 1.8),
+      irregularity: clamp(Number(source.irregularity) || 0, 0, 1),
+      translucency: clamp(Number(source.translucency) || 0, 0, 0.75),
+      glow: clamp(Number(source.glow) || 0, 0, 1),
+      pattern: ["none", "spots", "stripes", "rings"].includes(source.pattern) ? source.pattern : "none",
+      accent: source.accent || { hue: 268, saturation: 68, lightness: 72 }
+    };
+  }
+
   createCreatureMaterial(entity) {
     const color = this.coatColor(entity);
+    const appearance = this.appearanceFor(entity);
+    const armor = clamp(Number(entity.traits?.armor) || 1, 0.35, 2.5);
+    const armorFactor = clamp((armor - 0.35) / 2.15, 0, 1);
     return new THREE.MeshPhysicalMaterial({
       color,
-      roughness: entity.kind === "predator" ? 0.3 : 0.44,
-      metalness: entity.kind === "predator" ? 0.08 : 0,
-      clearcoat: entity.kind === "predator" ? 0.65 : 0.92,
+      roughness: clamp(0.5 - armorFactor * 0.2 + appearance.irregularity * 0.08, 0.2, 0.62),
+      metalness: armorFactor * 0.18,
+      clearcoat: 0.72 + armorFactor * 0.24,
       clearcoatRoughness: 0.22,
       transparent: true,
-      opacity: entity.kind === "predator" ? 0.92 : 0.8,
-      emissive: color.clone().multiplyScalar(entity.kind === "alien" ? 0.16 : 0.08),
-      emissiveIntensity: 0.65
+      opacity: clamp(0.94 - appearance.translucency * 0.48, 0.5, 0.96),
+      emissive: color.clone().multiplyScalar(0.12 + appearance.glow * 0.42),
+      emissiveIntensity: 0.62 + appearance.glow * 1.3,
+      iridescence: entity.abilities?.chameleon ? 0.78 : 0,
+      iridescenceIOR: 1.32,
+      iridescenceThicknessRange: [120, 420]
     });
   }
 
@@ -722,6 +827,78 @@ export class Aquarium3D {
       group.userData.nucleus = nucleus;
     }
 
+    const accent = this.accentColor(entity);
+    const armorMaterial = new THREE.LineBasicMaterial({
+      color: accent.clone().lerp(new THREE.Color(0xf1fff7), 0.58),
+      transparent: true,
+      opacity: 0,
+      depthWrite: false
+    });
+    const armorCage = this.markShared(new THREE.LineSegments(this.shared.armorCage, armorMaterial));
+    armorCage.userData.entityId = entity.id;
+    armorCage.visible = false;
+    group.add(armorCage);
+    group.userData.armorCage = armorCage;
+
+    const markingMaterial = new THREE.LineBasicMaterial({
+      color: accent,
+      transparent: true,
+      opacity: 0.62,
+      depthWrite: false
+    });
+    const stripes = this.markShared(new THREE.LineSegments(this.shared.patternStripes, markingMaterial));
+    const rings = this.markShared(new THREE.LineSegments(this.shared.patternRings, markingMaterial.clone()));
+    const spots = this.markShared(new THREE.Points(
+      this.shared.patternSpots,
+      new THREE.PointsMaterial({
+        color: accent,
+        size: 0.13,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.76,
+        depthWrite: false
+      })
+    ));
+    for (const marking of [stripes, rings, spots]) {
+      marking.userData.entityId = entity.id;
+      marking.visible = false;
+      group.add(marking);
+    }
+    group.userData.patterns = { stripes, rings, spots };
+
+    const venomMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xa8ff65,
+      emissive: 0x43ff7a,
+      emissiveIntensity: 1.8,
+      roughness: 0.28,
+      transparent: true,
+      opacity: 0.82
+    });
+    group.userData.venomGlands = [];
+    for (const side of [-1, 1]) {
+      const gland = this.markShared(new THREE.Mesh(this.shared.venomGland, venomMaterial));
+      gland.userData.entityId = entity.id;
+      gland.position.set(0.72, side * 0.34, 0.12);
+      gland.visible = false;
+      group.add(gland);
+      group.userData.venomGlands.push(gland);
+    }
+
+    const regenerationRing = this.markShared(new THREE.Mesh(
+      this.shared.regenerationRing,
+      new THREE.MeshBasicMaterial({
+        color: 0x8dffc3,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      })
+    ));
+    regenerationRing.rotation.x = Math.PI * 0.5;
+    regenerationRing.visible = false;
+    group.add(regenerationRing);
+    group.userData.regenerationRing = regenerationRing;
+
     const haloMaterial = new THREE.MeshBasicMaterial({
       color: entity.kind === "alien" ? 0x9effba : entity.kind === "grazer" ? 0x8ee2f4 : 0xf0a7e5,
       transparent: true,
@@ -798,23 +975,58 @@ export class Aquarium3D {
       group.rotation.y += (((-heading - group.rotation.y + Math.PI * 3) % TAU) - Math.PI) * clamp(delta * 6, 0.05, 0.4);
       group.rotation.z += (pitch - group.rotation.z) * clamp(delta * 5, 0.05, 0.36);
 
+      const appearance = this.appearanceFor(entity);
+      const armor = clamp(Number(entity.traits?.armor) || 1, 0.35, 2.5);
+      const armorFactor = clamp((armor - 0.35) / 2.15, 0, 1);
+      const strength = clamp(Number(entity.traits?.strength) || 1, 0.35, 2.5);
+      const intelligence = clamp(Number(entity.traits?.intelligence) || 1, 0.35, 2.5);
+      const appendageScale = appearance.appendages * (0.78 + strength * 0.22);
       const baseScale = 0.5 + clamp(entity.traits?.size || 1, 0.35, 2.5) * 0.36;
       const pulseAmplitude = morphology === "amoeba" ? 0.06 : morphology === "flagellate" ? 0.032 : morphology === "ciliate" ? 0.022 : 0.014;
       const pulse = 1 + Math.sin(this.time * 2.2 + (entity.visualPhase || entity.id)) * pulseAmplitude;
-      group.scale.setScalar(baseScale * pulse);
+      group.scale.set(
+        baseScale * pulse * appearance.elongation,
+        baseScale * pulse * appearance.bulk,
+        baseScale * pulse * appearance.bulk
+      );
       if (morphology === "amoeba") group.scale.y *= 0.92 + Math.sin(this.time * 1.7 + entity.id) * 0.04;
       if (morphology === "radiolarian") group.rotation.x += delta * 0.12;
 
       const coat = this.coatColor(entity);
+      const accent = this.accentColor(entity);
       const material = group.userData.bodyMaterial;
       material.color.lerp(coat, clamp(delta * 5, 0.08, 0.45));
-      material.emissive.copy(material.color).multiplyScalar(entity.kind === "alien" ? 0.16 : 0.08);
+      material.roughness = clamp(0.5 - armorFactor * 0.2 + appearance.irregularity * 0.08, 0.2, 0.62);
+      material.metalness = armorFactor * 0.18;
+      material.clearcoat = 0.72 + armorFactor * 0.24;
+      material.iridescence = entity.abilities?.chameleon ? 0.78 : 0;
+      material.emissive.copy(material.color).multiplyScalar(
+        (entity.kind === "alien" ? 0.13 : 0.07) + appearance.glow * 0.42
+      );
+      material.emissiveIntensity = 0.62 + appearance.glow * 1.3;
       const visibility = Number(entity.visualVisibility);
       const camouflageAlpha = Number.isFinite(visibility) ? clamp(0.48 + visibility * 0.45, 0.45, 0.96) : 0.82;
-      material.opacity = entity.kind === "predator" ? Math.max(0.76, camouflageAlpha) : camouflageAlpha;
+      material.opacity = clamp(camouflageAlpha * (1 - appearance.translucency * 0.42), 0.38, 0.96);
       const detailed = selected || hovered;
       const showStructure = detailed || entities.length <= 90;
-      if (group.userData.nucleus) group.userData.nucleus.visible = detailed;
+      if (group.userData.body) {
+        const irregularity = appearance.irregularity;
+        const phase = this.time * 1.65 + entity.id * 0.43;
+        group.userData.body.scale.set(
+          1 + Math.sin(phase) * irregularity * 0.055,
+          1 + Math.cos(phase * 1.17) * irregularity * 0.075,
+          1 + Math.sin(phase * 0.83 + 1.8) * irregularity * 0.065
+        );
+      }
+      if (group.userData.nucleus) {
+        group.userData.nucleus.visible = detailed;
+        const nucleusScale = 0.68 + intelligence * 0.17;
+        group.userData.nucleus.scale.set(
+          nucleusScale * (morphology === "ciliate" ? 1.1 : morphology === "radiolarian" ? 0.82 : 1),
+          nucleusScale * 0.92,
+          nucleusScale * 0.86
+        );
+      }
       if (group.userData.cilia) group.userData.cilia.visible = showStructure;
       if (group.userData.flagella) group.userData.flagella.visible = showStructure;
       if (group.userData.spikes) group.userData.spikes.visible = showStructure;
@@ -834,20 +1046,23 @@ export class Aquarium3D {
           lobe.position.y = Math.sin(phase * 1.12) * 0.42;
           lobe.position.z = Math.sin(phase * 0.72) * 0.24;
           const lobeScale = 0.82 + Math.sin(phase * 1.7) * 0.13;
-          lobe.scale.setScalar(lobeScale);
+          lobe.scale.setScalar(lobeScale * appendageScale);
         }
       }
       if (group.userData.cilia) {
+        group.userData.cilia.scale.setScalar(appendageScale);
         group.userData.cilia.rotation.x = Math.sin(this.time * 8 + entity.id) * 0.045;
         group.userData.cilia.rotation.z = Math.cos(this.time * 7.4 + entity.id) * 0.035;
         group.userData.cilia.material.opacity = detailed ? 0.86 : 0.5;
       }
       if (group.userData.flagella) {
+        group.userData.flagella.scale.setScalar(appendageScale);
         group.userData.flagella.rotation.x = Math.sin(this.time * 5.6 + entity.id) * 0.14;
         group.userData.flagella.rotation.z = Math.cos(this.time * 4.8 + entity.id) * 0.09;
         group.userData.flagella.material.opacity = detailed ? 0.92 : 0.62;
       }
       if (group.userData.spikes) {
+        group.userData.spikes.scale.setScalar(appendageScale);
         group.userData.spikes.rotation.x += delta * 0.18;
         group.userData.spikes.rotation.z -= delta * 0.14;
         group.userData.spikes.material.opacity = detailed ? 0.9 : 0.68;
@@ -859,6 +1074,53 @@ export class Aquarium3D {
         const bite = Math.sin(this.time * 5.2 + entity.id) * 0.18;
         group.userData.mandibles[0].rotation.z = -Math.PI * 0.5 - 0.28 - bite;
         group.userData.mandibles[1].rotation.z = -Math.PI * 0.5 + 0.28 + bite;
+        group.userData.mandibles[0].scale.set(appendageScale, appendageScale * strength, appendageScale);
+        group.userData.mandibles[1].scale.set(appendageScale, appendageScale * strength, appendageScale);
+      }
+
+      const cage = group.userData.armorCage;
+      const armorVisible = armorFactor > 0.14;
+      cage.visible = armorVisible && (showStructure || armorFactor > 0.48);
+      if (cage.visible) {
+        const cageLength = morphology === "radiolarian" ? 0.78 : morphology === "amoeba" ? 0.88 : 1;
+        const cageBulk = morphology === "trilobite" ? 0.74 : morphology === "radiolarian" ? 1.12 : 0.9;
+        cage.scale.set(cageLength * 1.03, cageBulk * 1.03, cageBulk * 1.03);
+        cage.material.color.copy(accent).lerp(new THREE.Color(0xf1fff7), 0.42 + armorFactor * 0.28);
+        cage.material.opacity = 0.1 + armorFactor * 0.68;
+      }
+
+      const patterns = group.userData.patterns;
+      const patternOpacity = clamp(0.34 + appearance.glow * 0.3 + (detailed ? 0.18 : 0), 0.28, 0.82);
+      for (const [name, marking] of Object.entries(patterns)) {
+        marking.visible = appearance.pattern === name && showStructure;
+        if (!marking.visible) continue;
+        marking.material.color.copy(accent);
+        marking.material.opacity = patternOpacity;
+        const patternLength = morphology === "radiolarian" ? 0.74 : morphology === "amoeba" ? 0.84 : 0.98;
+        const patternBulk = morphology === "trilobite" ? 0.7 : morphology === "radiolarian" ? 0.92 : 0.86;
+        marking.scale.set(patternLength, patternBulk, patternBulk);
+      }
+
+      const venomActive = Boolean(entity.abilities?.venom);
+      for (let index = 0; index < group.userData.venomGlands.length; index += 1) {
+        const gland = group.userData.venomGlands[index];
+        gland.visible = venomActive && showStructure;
+        if (gland.visible) {
+          const side = index === 0 ? -1 : 1;
+          gland.position.set(0.64, side * (0.3 + appearance.bulk * 0.08), 0.16);
+          const glandPulse = (0.76 + strength * 0.16) * (1 + Math.sin(this.time * 3.8 + entity.id + index) * 0.1);
+          gland.scale.setScalar(glandPulse);
+        }
+      }
+
+      const regenerating = Boolean(entity.abilities?.regeneration);
+      const healthRatio = clamp(entity.health / Math.max(1, entity.traits?.maxHealth || entity.health || 1), 0, 1);
+      group.userData.regenerationRing.visible = regenerating && showStructure;
+      if (group.userData.regenerationRing.visible) {
+        const healing = healthRatio < 0.96 && entity.energy > (entity.traits?.maxEnergy || entity.energy || 1) * 0.48;
+        group.userData.regenerationRing.material.opacity = healing ? 0.38 + Math.sin(this.time * 5.4 + entity.id) * 0.14 : 0.1;
+        group.userData.regenerationRing.scale.setScalar(1 + Math.sin(this.time * 2.7 + entity.id) * 0.08);
+        group.userData.regenerationRing.rotation.z = -this.time * 0.42;
       }
 
       group.userData.halo.visible = selected || hovered;
@@ -872,7 +1134,7 @@ export class Aquarium3D {
         group.userData.trail.material.opacity = 0.08 + Math.sin(this.time * 7 + entity.id) * 0.025;
         group.userData.trail.scale.y = 0.7 + horizontalSpeed / Math.max(1, entity.traits?.maxSpeed || 1) * 0.5;
       }
-      if (entity.abilities?.regeneration && entity.health < entity.traits.maxHealth * 0.96 && entity.energy > entity.traits.maxEnergy * 0.48 && hash(Math.floor(this.time * 8) + entity.id, 72) > 0.84) {
+      if (!this.previewMode && entity.abilities?.regeneration && entity.health < entity.traits.maxHealth * 0.96 && entity.energy > entity.traits.maxEnergy * 0.48 && hash(Math.floor(this.time * 8) + entity.id, 72) > 0.84) {
         this.emit("regeneration", entity.x, entity.y, entity.z || 0, "#8dffc3", 1);
       }
     }
@@ -1024,6 +1286,33 @@ export class Aquarium3D {
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(1.6, dpr || window.devicePixelRatio || 1));
     this.renderer.setSize(this.width, this.height, false);
+  }
+
+  renderPreview(entity, delta = 1 / 60) {
+    if (!this.previewMode || !entity) return;
+    this.time += Math.min(0.1, Math.max(0, delta));
+    const previewEntity = {
+      ...entity,
+      displayCoat: { ...(entity.displayCoat || entity.coat) }
+    };
+    if (previewEntity.abilities?.chameleon) {
+      const base = entity.coat || { hue: 137, saturation: 58, lightness: 58 };
+      previewEntity.displayCoat.hue = (Number(base.hue) + 78 + Math.sin(this.time * 0.72) * 92 + 360) % 360;
+      previewEntity.displayCoat.saturation = clamp(Number(base.saturation) + Math.sin(this.time * 0.53 + 1.4) * 18, 24, 88);
+      previewEntity.displayCoat.lightness = clamp(Number(base.lightness) + Math.sin(this.time * 0.61 + 2.2) * 12, 28, 72);
+      previewEntity.visualVisibility = 0.78 + Math.sin(this.time * 0.72) * 0.12;
+    }
+    this.updateEntities([previewEntity], null, previewEntity.id, delta);
+    const object = this.entityObjects.get(previewEntity.id);
+    if (object) {
+      object.userData.halo.visible = false;
+      this.controls.target.y += (object.position.y - this.controls.target.y) * clamp(delta * 4, 0.02, 0.22);
+    }
+    this.controls.update(delta);
+    this.renderer.render(this.scene, this.camera);
+    this.canvas.dataset.renderCalls = String(this.renderer.info.render.calls);
+    this.canvas.dataset.triangles = String(this.renderer.info.render.triangles);
+    this.canvas.dataset.renderedEntities = String(this.entityObjects.size);
   }
 
   render(state, delta = 1 / 60, hoveredId = null) {

@@ -109,7 +109,7 @@
     <div class="welcome-rules" aria-label="Краткие правила игры">
       <div class="welcome-rule">
         <span class="welcome-rule-number">01</span>
-        <div><div class="welcome-rule-title">Конструируй за очки</div><p>Характеристики, маскировка и способности повышают стоимость высадки. Цвет покрова тоже задаётся в геноме.</p></div>
+        <div><div class="welcome-rule-title">Конструируй за очки</div><p>Характеристики, маскировка и способности повышают стоимость высадки. Форму, пропорции, рисунок и цвета можно настроить отдельно.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">02</span>
@@ -121,7 +121,7 @@
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">04</span>
-        <div><div class="welcome-rule-title">Наблюдай эволюцию</div><p>Потомки наследуют цвет и способности, а числовые признаки мутируют до ±10%. Интеллект расширяет набор факторов решения.</p></div>
+        <div><div class="welcome-rule-title">Наблюдай эволюцию</div><p>Потомки наследуют форму, рисунок, цвета и способности, а числовые признаки мутируют до ±10%. Интеллект расширяет набор факторов решения.</p></div>
       </div>
       <div class="welcome-rule">
         <span class="welcome-rule-number">05</span>
@@ -195,6 +195,51 @@
         </select>
         <span id="eco-morphology-note" class="text-small text-muted">Пластичное тело с подвижными ложноножками.</span>
       </div>
+      <details class="eco-visual-editor" open>
+        <summary>Внешность вида</summary>
+        <div class="eco-visual-editor-layout">
+          <div class="eco-specimen-preview">
+            <canvas id="eco-species-preview" role="img" aria-label="Вращаемый трёхмерный образец создаваемого вида"></canvas>
+            <span id="eco-preview-caption" class="viz-badge">Новый вид · амёба</span>
+          </div>
+          <div class="eco-visual-controls">
+            <label class="form-label" for="eco-species-name">Название вида
+              <input id="eco-species-name" class="form-control" type="text" maxlength="32" value="Адаптив" autocomplete="off">
+            </label>
+            <div class="eco-visual-gene-grid">
+              <label class="form-label">Вытянутость <span id="eco-appearance-elongation-value">1.00</span><input id="eco-appearance-elongation" class="form-range" type="range" min="0.65" max="1.55" step="0.01" value="1"></label>
+              <label class="form-label">Толщина <span id="eco-appearance-bulk-value">1.00</span><input id="eco-appearance-bulk" class="form-range" type="range" min="0.65" max="1.55" step="0.01" value="1"></label>
+              <label class="form-label">Придатки <span id="eco-appearance-appendages-value">1.00</span><input id="eco-appearance-appendages" class="form-range" type="range" min="0.40" max="1.80" step="0.01" value="1"></label>
+              <label class="form-label">Пластичность <span id="eco-appearance-irregularity-value">0.50</span><input id="eco-appearance-irregularity" class="form-range" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+              <label class="form-label">Прозрачность <span id="eco-appearance-translucency-value">0.25</span><input id="eco-appearance-translucency" class="form-range" type="range" min="0" max="0.75" step="0.01" value="0.25"></label>
+              <label class="form-label">Свечение <span id="eco-appearance-glow-value">0.20</span><input id="eco-appearance-glow" class="form-range" type="range" min="0" max="1" step="0.01" value="0.2"></label>
+            </div>
+            <div class="eco-marking-row viz-row">
+              <label class="form-label" for="eco-pattern">Рисунок
+                <select id="eco-pattern" class="form-select">
+                  <option value="none">Без рисунка</option>
+                  <option value="spots">Пятна</option>
+                  <option value="stripes">Полосы</option>
+                  <option value="rings">Кольца</option>
+                </select>
+              </label>
+              <label class="form-label eco-accent-field" for="eco-accent-color">Дополнительный цвет
+                <input id="eco-accent-color" class="form-control form-control-color" type="color" value="#b69cff">
+              </label>
+            </div>
+            <div class="eco-species-library viz-row">
+              <label class="form-label" for="eco-species-library">Сохранённые виды</label>
+              <select id="eco-species-library" class="form-select" aria-label="Сохранённые виды игрока">
+                <option value="">Пока нет сохранённых видов</option>
+              </select>
+              <button type="button" id="eco-save-species" class="btn btn-ghost">Сохранить вид</button>
+              <button type="button" id="eco-load-species" class="btn btn-ghost" disabled>Загрузить</button>
+              <button type="button" id="eco-delete-species" class="btn btn-ghost" disabled>Удалить</button>
+            </div>
+            <p class="text-small text-muted eco-visual-note">Модель обновляется сразу: броня формирует наружный каркас, сила увеличивает придатки, а способности добавляют собственные эффекты.</p>
+          </div>
+        </div>
+      </details>
       <div class="eco-gene-grid">
         <label class="form-label">Сила <span id="eco-gene-strength-value">1.00</span><input id="eco-gene-strength" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
         <label class="form-label">Ловкость <span id="eco-gene-agility-value">1.00</span><input id="eco-gene-agility" class="form-range" type="range" min="0.35" max="2.5" step="0.01" value="1"></label>
@@ -372,6 +417,87 @@
 
 #ecosystem-game-prototype .eco-morphology-row #eco-morphology-note {
   flex: 1 1 260px;
+}
+
+#ecosystem-game-prototype .eco-visual-editor {
+  margin: 0 0 0.8rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid var(--border);
+}
+
+#ecosystem-game-prototype .eco-visual-editor summary {
+  cursor: pointer;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+#ecosystem-game-prototype .eco-visual-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.36fr) minmax(0, 1fr);
+  gap: 0.8rem;
+  margin-top: 0.6rem;
+}
+
+#ecosystem-game-prototype .eco-specimen-preview {
+  position: relative;
+  min-height: 17rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: radial-gradient(circle at 50% 42%, rgba(94, 211, 183, 0.12), rgba(4, 17, 22, 0.74));
+}
+
+#ecosystem-game-prototype #eco-species-preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 17rem;
+  touch-action: none;
+}
+
+#ecosystem-game-prototype .eco-specimen-preview .viz-badge {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  max-width: calc(100% - 1.1rem);
+}
+
+#ecosystem-game-prototype .eco-visual-controls,
+#ecosystem-game-prototype .eco-visual-gene-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+#ecosystem-game-prototype .eco-visual-gene-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#ecosystem-game-prototype .eco-visual-gene-grid .form-label {
+  display: grid;
+  gap: 0.22rem;
+}
+
+#ecosystem-game-prototype .eco-visual-gene-grid .form-label span {
+  color: var(--muted-foreground);
+}
+
+#ecosystem-game-prototype .eco-marking-row,
+#ecosystem-game-prototype .eco-species-library {
+  align-items: end;
+  gap: 0.55rem;
+}
+
+#ecosystem-game-prototype .eco-marking-row .form-label,
+#ecosystem-game-prototype .eco-species-library .form-select {
+  flex: 1 1 180px;
+}
+
+#ecosystem-game-prototype .eco-accent-field input {
+  min-height: 2.45rem;
+}
+
+#ecosystem-game-prototype .eco-visual-note {
+  margin: 0;
 }
 
 #ecosystem-game-prototype .eco-gene-grid {
@@ -742,7 +868,8 @@
 
   #ecosystem-game-prototype .eco-template-row,
   #ecosystem-game-prototype .eco-morphology-row,
-  #ecosystem-game-prototype .eco-appearance-row {
+  #ecosystem-game-prototype .eco-appearance-row,
+  #ecosystem-game-prototype .eco-visual-editor-layout {
     grid-template-columns: 1fr;
   }
 
@@ -754,6 +881,15 @@
 
   #ecosystem-game-prototype .eco-ability-grid {
     grid-template-columns: 1fr;
+  }
+
+  #ecosystem-game-prototype .eco-visual-gene-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #ecosystem-game-prototype .eco-species-library {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   #ecosystem-game-prototype .eco-end-screen {
@@ -1311,7 +1447,7 @@ window.addEventListener('unhandledrejection', (event) => {
 <script type="module">
 let Aquarium3D;
 try {
-  ({ Aquarium3D } = await import("./src/aquarium3d.js?v=5-3d-4"));
+  ({ Aquarium3D } = await import("./src/aquarium3d.js?v=5-3d-5"));
 } catch (error) {
   const message = error && error.message ? error.message : String(error);
   window.__amoebasBootErrors.push(message);
@@ -1341,6 +1477,17 @@ try {
   const templateSelect = document.getElementById('eco-template');
   const morphologySelect = document.getElementById('eco-morphology');
   const morphologyNote = document.getElementById('eco-morphology-note');
+  const speciesPreviewCanvas = document.getElementById('eco-species-preview');
+  const constructorDetails = root.querySelector('.eco-constructor');
+  const visualEditorDetails = root.querySelector('.eco-visual-editor');
+  const previewCaption = document.getElementById('eco-preview-caption');
+  const speciesNameInput = document.getElementById('eco-species-name');
+  const patternSelect = document.getElementById('eco-pattern');
+  const accentColorInput = document.getElementById('eco-accent-color');
+  const speciesLibrarySelect = document.getElementById('eco-species-library');
+  const saveSpeciesButton = document.getElementById('eco-save-species');
+  const loadSpeciesButton = document.getElementById('eco-load-species');
+  const deleteSpeciesButton = document.getElementById('eco-delete-species');
   const colonySelector = document.getElementById('eco-colony-selector');
   const loadTemplateButton = document.getElementById('eco-load-template');
   const coatColorInput = document.getElementById('eco-coat-color');
@@ -1374,6 +1521,9 @@ try {
   const geneNames = ['strength', 'agility', 'constitution', 'intelligence', 'size', 'armor', 'camouflage'];
   const geneInputs = Object.fromEntries(geneNames.map((name) => [name, document.getElementById('eco-gene-' + name)]));
   const geneValueLabels = Object.fromEntries(geneNames.map((name) => [name, document.getElementById('eco-gene-' + name + '-value')]));
+  const appearanceNames = ['elongation', 'bulk', 'appendages', 'irregularity', 'translucency', 'glow'];
+  const appearanceInputs = Object.fromEntries(appearanceNames.map((name) => [name, document.getElementById('eco-appearance-' + name)]));
+  const appearanceValueLabels = Object.fromEntries(appearanceNames.map((name) => [name, document.getElementById('eco-appearance-' + name + '-value')]));
   const abilityInputs = Object.fromEntries([...root.querySelectorAll('[data-eco-ability]')].map((input) => [input.dataset.ecoAbility, input]));
 
   const LOGICAL_WIDTH = 1200;
@@ -1405,6 +1555,15 @@ try {
     trilobite: { label: 'трилобитоид', note: 'Низкое панцирное тело с сегментами и хватательными придатками.' }
   };
 
+  const appearanceLimits = {
+    elongation: [0.65, 1.55],
+    bulk: [0.65, 1.55],
+    appendages: [0.4, 1.8],
+    irregularity: [0, 1],
+    translucency: [0, 0.75],
+    glow: [0, 1]
+  };
+
   const terrainAppearance = {
     water: { hue: 202, saturation: 42, lightness: 34 },
     meadow: { hue: 104, saturation: 48, lightness: 42 },
@@ -1416,11 +1575,11 @@ try {
   };
 
   const genomeTemplates = {
-    balanced: { morphology: 'amoeba', strength: 1, agility: 1.08, constitution: 1.05, intelligence: 1.25, size: 0.92, armor: 0.86, camouflage: 1, diet: 'omnivore', coat: { hue: 137, saturation: 58, lightness: 58 }, abilities: { sprint: true } },
-    grazer: { morphology: 'ciliate', strength: 0.62, agility: 1.12, constitution: 1.12, intelligence: 0.92, size: 0.66, armor: 0.58, camouflage: 1.18, diet: 'herbivore', coat: { hue: 106, saturation: 42, lightness: 46 }, abilities: { regeneration: true } },
-    hunter: { morphology: 'trilobite', strength: 1.38, agility: 1.22, constitution: 0.98, intelligence: 1.72, size: 1.08, armor: 0.82, camouflage: 1.62, diet: 'carnivore', coat: { hue: 128, saturation: 28, lightness: 30 }, abilities: { chameleon: true, venom: true } },
-    solar: { morphology: 'radiolarian', strength: 0.48, agility: 0.72, constitution: 1.35, intelligence: 1.08, size: 0.78, armor: 0.74, camouflage: 1.08, diet: 'solar', coat: { hue: 92, saturation: 66, lightness: 48 }, abilities: { regeneration: true } },
-    runner: { morphology: 'flagellate', strength: 0.82, agility: 1.72, constitution: 0.82, intelligence: 1.42, size: 0.58, armor: 0.44, camouflage: 0.88, diet: 'omnivore', coat: { hue: 174, saturation: 58, lightness: 52 }, abilities: { sprint: true } }
+    balanced: { speciesName: 'Адаптив', morphology: 'amoeba', appearance: { elongation: 1, bulk: 1, appendages: 1.08, irregularity: 0.68, translucency: 0.26, glow: 0.22, pattern: 'spots', accent: { hue: 268, saturation: 68, lightness: 72 } }, strength: 1, agility: 1.08, constitution: 1.05, intelligence: 1.25, size: 0.92, armor: 0.86, camouflage: 1, diet: 'omnivore', coat: { hue: 137, saturation: 58, lightness: 58 }, abilities: { sprint: true } },
+    grazer: { speciesName: 'Тихая туфелька', morphology: 'ciliate', appearance: { elongation: 1.16, bulk: 0.84, appendages: 1.28, irregularity: 0.28, translucency: 0.34, glow: 0.1, pattern: 'stripes', accent: { hue: 52, saturation: 72, lightness: 68 } }, strength: 0.62, agility: 1.12, constitution: 1.12, intelligence: 0.92, size: 0.66, armor: 0.58, camouflage: 1.18, diet: 'herbivore', coat: { hue: 106, saturation: 42, lightness: 46 }, abilities: { regeneration: true } },
+    hunter: { speciesName: 'Теневой панцирник', morphology: 'trilobite', appearance: { elongation: 1.22, bulk: 1.18, appendages: 1.38, irregularity: 0.18, translucency: 0.08, glow: 0.12, pattern: 'rings', accent: { hue: 300, saturation: 46, lightness: 64 } }, strength: 1.38, agility: 1.22, constitution: 0.98, intelligence: 1.72, size: 1.08, armor: 0.82, camouflage: 1.62, diet: 'carnivore', coat: { hue: 128, saturation: 28, lightness: 30 }, abilities: { chameleon: true, venom: true } },
+    solar: { speciesName: 'Солнечный лучевик', morphology: 'radiolarian', appearance: { elongation: 0.86, bulk: 1.08, appendages: 1.5, irregularity: 0.22, translucency: 0.42, glow: 0.72, pattern: 'rings', accent: { hue: 54, saturation: 86, lightness: 68 } }, strength: 0.48, agility: 0.72, constitution: 1.35, intelligence: 1.08, size: 0.78, armor: 0.74, camouflage: 1.08, diet: 'solar', coat: { hue: 92, saturation: 66, lightness: 48 }, abilities: { regeneration: true } },
+    runner: { speciesName: 'Бирюзовый жгутик', morphology: 'flagellate', appearance: { elongation: 1.34, bulk: 0.76, appendages: 1.62, irregularity: 0.34, translucency: 0.3, glow: 0.34, pattern: 'spots', accent: { hue: 192, saturation: 78, lightness: 74 } }, strength: 0.82, agility: 1.72, constitution: 0.82, intelligence: 1.42, size: 0.58, armor: 0.44, camouflage: 0.88, diet: 'omnivore', coat: { hue: 174, saturation: 58, lightness: 52 }, abilities: { sprint: true } }
   };
 
   const terrain = [];
@@ -1455,7 +1614,9 @@ try {
     goalStartDay: 1168,
     conquestHoldDays: 0,
     genome: {
+      speciesName: 'Адаптив',
       morphology: 'amoeba',
+      appearance: { elongation: 1, bulk: 1, appendages: 1.08, irregularity: 0.68, translucency: 0.26, glow: 0.22, pattern: 'spots', accent: { hue: 268, saturation: 68, lightness: 72 } },
       strength: 1,
       agility: 1,
       constitution: 1,
@@ -1468,7 +1629,9 @@ try {
       abilities: {}
     },
     draftGenome: {
+      speciesName: 'Адаптив',
       morphology: 'amoeba',
+      appearance: { elongation: 1, bulk: 1, appendages: 1.08, irregularity: 0.68, translucency: 0.26, glow: 0.22, pattern: 'spots', accent: { hue: 268, saturation: 68, lightness: 72 } },
       strength: 1,
       agility: 1,
       constitution: 1,
@@ -1481,6 +1644,7 @@ try {
       abilities: {}
     },
     points: STARTING_POINTS,
+    speciesLibrary: [],
     deployedCount: 0,
     deployArmed: false,
     gameStatus: 'playing',
@@ -1552,6 +1716,7 @@ try {
   };
 
   let aquarium3d = null;
+  let speciesPreview3d = null;
   try {
     aquarium3d = new Aquarium3D(canvas, {
       simWidth: LOGICAL_WIDTH,
@@ -1563,6 +1728,17 @@ try {
   } catch (error) {
     console.error('Не удалось запустить 3D-аквариум:', error);
     if (loading3d) loading3d.textContent = 'WebGL недоступен в этом браузере';
+  }
+  try {
+    speciesPreview3d = new Aquarium3D(speciesPreviewCanvas, {
+      simWidth: LOGICAL_WIDTH,
+      simDepth: LOGICAL_HEIGHT,
+      simHeight: AQUARIUM_HEIGHT,
+      previewMode: true
+    });
+  } catch (error) {
+    console.error('Не удалось запустить предпросмотр вида:', error);
+    if (speciesPreviewCanvas) speciesPreviewCanvas.setAttribute('aria-label', 'Трёхмерный предпросмотр недоступен');
   }
 
   function token(name) {
@@ -1669,10 +1845,47 @@ try {
     return morphologyDefinitions[value] ? value : defaultMorphology(kind, key);
   }
 
+  function normalizeSpeciesName(value, fallback) {
+    const cleaned = String(value || '').replace(/\s+/g, ' ').trim().slice(0, 32);
+    return cleaned || fallback || 'Безымянный вид';
+  }
+
+  function defaultAppearance(kind, key, morphology) {
+    const morph = normalizeMorphology(morphology, kind, key);
+    const nativePattern = morph === 'trilobite' ? 'stripes' : morph === 'radiolarian' ? 'rings' : visualHash(Number(key) || 0, 62) > 0.7 ? 'spots' : 'none';
+    return {
+      elongation: morph === 'ciliate' || morph === 'flagellate' ? 1.12 : morph === 'trilobite' ? 1.08 : 1,
+      bulk: morph === 'trilobite' ? 1.16 : morph === 'radiolarian' ? 1.06 : 1,
+      appendages: morph === 'radiolarian' ? 1.28 : 1,
+      irregularity: morph === 'amoeba' ? 0.68 : 0.24,
+      translucency: kind === 'predator' ? 0.1 : 0.28,
+      glow: morph === 'radiolarian' ? 0.42 : 0.12,
+      pattern: nativePattern,
+      accent: kind === 'predator'
+        ? { hue: 314, saturation: 52, lightness: 66 }
+        : { hue: 190, saturation: 66, lightness: 72 }
+    };
+  }
+
+  function normalizeAppearance(source, kind, key, morphology) {
+    const fallback = defaultAppearance(kind, key, morphology);
+    const appearance = {};
+    for (const name of appearanceNames) {
+      const limits = appearanceLimits[name];
+      const value = Number(source && source[name]);
+      appearance[name] = clamp(Number.isFinite(value) ? value : fallback[name], limits[0], limits[1]);
+    }
+    appearance.pattern = source && ['none', 'spots', 'stripes', 'rings'].includes(source.pattern) ? source.pattern : fallback.pattern;
+    appearance.accent = normalizeCoat(source && source.accent, fallback.accent);
+    return appearance;
+  }
+
   function cloneGenome(source) {
     const genome = {};
     for (const name of geneNames) genome[name] = clamp(Number(source && source[name]) || 1, 0.35, 2.5);
     genome.morphology = normalizeMorphology(source && source.morphology, 'alien', 0);
+    genome.speciesName = normalizeSpeciesName(source && source.speciesName, 'Адаптив');
+    genome.appearance = normalizeAppearance(source && source.appearance, 'alien', 0, genome.morphology);
     genome.diet = source && ['herbivore', 'omnivore', 'carnivore', 'solar'].includes(source.diet) ? source.diet : 'omnivore';
     genome.coat = normalizeCoat(source && source.coat, archetypes.alien.baseCoat);
     genome.abilities = normalizeAbilities(source && source.abilities);
@@ -1953,6 +2166,37 @@ try {
     return defaultMorphology(kind, state.nextId);
   }
 
+  function inheritedAppearance(kind, parent, override, morphology) {
+    if (override && override.appearance) return normalizeAppearance(override.appearance, kind, state.nextId, morphology);
+    const source = normalizeAppearance(parent && parent.appearance, kind, parent ? parent.id : state.nextId, morphology);
+    if (!parent) return source;
+    const inherited = { ...source, accent: { ...source.accent } };
+    for (const name of appearanceNames) {
+      const limits = appearanceLimits[name];
+      inherited[name] = clamp(source[name] * (1 + (random() * 2 - 1) * MUTATION_FACTOR), limits[0], limits[1]);
+    }
+    inherited.accent = normalizeCoat({
+      hue: source.accent.hue + (random() * 2 - 1) * 9,
+      saturation: source.accent.saturation + (random() * 2 - 1) * 4,
+      lightness: source.accent.lightness + (random() * 2 - 1) * 4
+    }, source.accent);
+    return inherited;
+  }
+
+  function speciesNameFor(kind, parent, override, morphology) {
+    if (override && override.speciesName) return normalizeSpeciesName(override.speciesName);
+    if (parent && parent.speciesName) return normalizeSpeciesName(parent.speciesName);
+    if (kind === 'alien') return normalizeSpeciesName(state.genome.speciesName, 'Адаптив');
+    const nativeNames = {
+      ciliate: 'Местные инфузории',
+      flagellate: 'Дикие жгутиконосцы',
+      radiolarian: 'Глубинные лучевики',
+      trilobite: 'Панцирники аквариума',
+      amoeba: 'Местные амёбы'
+    };
+    return nativeNames[morphology] || 'Коренной вид';
+  }
+
   function entityName(kind, id) {
     const prefix = kind === 'alien' ? 'А' : kind === 'grazer' ? 'Т' : 'Х';
     return prefix + '-' + String(id).padStart(2, '0');
@@ -1965,6 +2209,8 @@ try {
     const coat = inheritedCoat(kind, parent, genesOverride);
     const abilities = inheritedAbilities(kind, parent, genesOverride);
     const morphology = inheritedMorphology(kind, parent, genesOverride);
+    const appearance = inheritedAppearance(kind, parent, genesOverride, morphology);
+    const speciesName = speciesNameFor(kind, parent, genesOverride, morphology);
     const diet = dietOverride || (parent ? parent.diet : kind === 'alien' ? state.genome.diet : 'native');
     const spawnHeight = Number.isFinite(Number(heightOverride))
       ? Number(heightOverride)
@@ -1984,6 +2230,8 @@ try {
       traits,
       diet,
       morphology,
+      speciesName,
+      appearance,
       coat,
       displayCoat: { ...coat },
       abilities,
@@ -2117,6 +2365,13 @@ try {
     state.conquestHoldDays = Math.max(0, Number(saved.conquestHoldDays) || 0);
     state.genome = cloneGenome(saved.genome || state.genome);
     state.draftGenome = cloneGenome(saved.draftGenome || state.genome);
+    state.speciesLibrary = Array.isArray(saved.speciesLibrary)
+      ? saved.speciesLibrary.slice(0, 16).map((entry, index) => ({
+          id: String(entry && entry.id || 'species-' + index),
+          name: normalizeSpeciesName(entry && entry.name, 'Сохранённый вид ' + (index + 1)),
+          genome: cloneGenome(entry && entry.genome)
+        }))
+      : [];
     state.entities.forEach((entity) => {
       const base = archetypes[entity.kind] || archetypes.grazer;
       if (!entity.traits || !Number.isFinite(entity.traits.maxHealth)) {
@@ -2134,6 +2389,8 @@ try {
       }
       entity.diet = entity.diet || (entity.kind === 'alien' ? state.genome.diet : 'native');
       entity.morphology = normalizeMorphology(entity.morphology, entity.kind, entity.id);
+      entity.speciesName = normalizeSpeciesName(entity.speciesName, speciesNameFor(entity.kind, null, null, entity.morphology));
+      entity.appearance = normalizeAppearance(entity.appearance, entity.kind, entity.id, entity.morphology);
       entity.coat = normalizeCoat(entity.coat, base.baseCoat);
       entity.displayCoat = normalizeCoat(entity.displayCoat || entity.coat, entity.coat);
       entity.abilities = normalizeAbilities(entity.abilities || base.baseAbilities);
@@ -2701,7 +2958,7 @@ try {
           entity.thinkTimer = 0;
           state.births += 1;
           emitVisualEffect('birth', child.x, child.y, child.kind === 'alien' ? '#a3ffc0' : child.kind === 'grazer' ? '#a2e7f8' : '#eface8', 10, child.z);
-          if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение ' + child.generation + ': ' + child.name + ' от ' + entity.name + '. Цвет и признаки унаследованы с мутацией до 10%.', 'birth');
+          if (entity.kind === 'alien' || random() < 0.14) addEvent('Новое поколение ' + child.generation + ': ' + child.name + ' от ' + entity.name + '. Форма, рисунок и цвета унаследованы; числовые признаки мутировали до 10%.', 'birth');
         }
       }
     }
@@ -2928,7 +3185,10 @@ try {
       const brain = brainProfile(entity.traits.intelligence);
       const currentCell = getCellAt(entity.x, entity.y);
       addInspectorHeading(entity.name, archetypes[entity.kind].label + (entity.kind === 'alien' ? ' · колония' : ' · коренной вид'));
+      addInspectorRow('Вид', entity.speciesName || 'безымянный');
       addInspectorRow('Форма тела', morphologyDefinitions[normalizeMorphology(entity.morphology, entity.kind, entity.id)].label);
+      addInspectorRow('Рисунок', { none: 'нет', spots: 'пятна', stripes: 'полосы', rings: 'кольца' }[entity.appearance && entity.appearance.pattern] || 'нет');
+      addInspectorRow('Свечение', Math.round((entity.appearance && entity.appearance.glow || 0) * 100) + '%');
       addInspectorRow('Состояние', entity.stateLabel);
       addInspectorRow('Решение', decisionLabel(entity.decision && entity.decision.action, state.entities.find((other) => entity.decision && other.id === entity.decision.targetId)));
       addInspectorRow('Причина', entity.decision && entity.decision.reason ? entity.decision.reason : 'реакция на ближайший стимул');
@@ -2951,7 +3211,9 @@ try {
       addInspectorRow('Обзор', Math.round(entity.traits.perception));
       addInspectorRow('Мозг', brain.tier + ' · ' + brain.factors.length + ' ' + factorWord(brain.factors.length));
       addInspectorRow('Учитывает', brain.factors.join(', '));
-      addInspectorRow('Покров', hslToHex(entity.coat).toUpperCase());
+      addInspectorRow('Наследуемый покров', hslToHex(entity.coat).toUpperCase());
+      if (entity.abilities && entity.abilities.chameleon) addInspectorRow('Текущий покров', hslToHex(entity.displayCoat || entity.coat).toUpperCase() + ' · меняется под биом');
+      addInspectorRow('Прозрачность', Math.round((entity.appearance && entity.appearance.translucency || 0) * 100) + '%');
       addInspectorRow('Слияние с биомом', Math.round(coatMatch(entity, currentCell) * 100) + '%');
       addInspectorRow('Заметность', Math.round(entityVisibility(entity) * 100) + '%');
       addInspectorRow('Способности', abilityLabels(entity.abilities).join(', ') || 'нет');
@@ -2991,6 +3253,32 @@ try {
     updateHud();
   }
 
+  function updateSpeciesLibraryUI(selectedId) {
+    const current = selectedId || speciesLibrarySelect.value;
+    speciesLibrarySelect.textContent = '';
+    if (!state.speciesLibrary.length) {
+      const empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = 'Пока нет сохранённых видов';
+      speciesLibrarySelect.appendChild(empty);
+    } else {
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Выберите сохранённый вид · ' + state.speciesLibrary.length;
+      speciesLibrarySelect.appendChild(placeholder);
+      for (const entry of state.speciesLibrary) {
+        const option = document.createElement('option');
+        option.value = entry.id;
+        option.textContent = entry.name + ' · ' + morphologyDefinitions[entry.genome.morphology].label;
+        speciesLibrarySelect.appendChild(option);
+      }
+    }
+    speciesLibrarySelect.value = state.speciesLibrary.some((entry) => entry.id === current) ? current : '';
+    const hasSelection = Boolean(speciesLibrarySelect.value);
+    loadSpeciesButton.disabled = !hasSelection;
+    deleteSpeciesButton.disabled = !hasSelection;
+  }
+
   function updateConstructorUI() {
     const draft = cloneGenome(state.draftGenome || state.genome);
     state.draftGenome = draft;
@@ -3003,6 +3291,14 @@ try {
     dietSelect.value = draft.diet;
     morphologySelect.value = draft.morphology;
     morphologyNote.textContent = morphologyDefinitions[draft.morphology].note + ' Форма наследуется при делении.';
+    speciesNameInput.value = draft.speciesName;
+    for (const name of appearanceNames) {
+      appearanceInputs[name].value = String(draft.appearance[name]);
+      appearanceValueLabels[name].textContent = draft.appearance[name].toFixed(2);
+    }
+    patternSelect.value = draft.appearance.pattern;
+    accentColorInput.value = hslToHex(draft.appearance.accent);
+    previewCaption.textContent = draft.speciesName + ' · ' + morphologyDefinitions[draft.morphology].label;
     coatColorInput.value = hslToHex(draft.coat);
     for (const name of Object.keys(abilityInputs)) abilityInputs[name].checked = Boolean(draft.abilities[name]);
     const preview = deriveStatsFromGenes('alien', draft);
@@ -3021,29 +3317,34 @@ try {
     applyGenomeButton.textContent = alienCount ? 'Применить к колонии (' + applyCost + ')' : 'Сохранить геном колонии';
     applyGenomeButton.disabled = state.gameStatus !== 'playing' || state.points < applyCost;
     applyGenomeButton.dataset.cost = String(applyCost);
+    updateSpeciesLibraryUI();
   }
 
   let colonySelectorSignature = '';
   function updateColonySelector() {
     const aliens = state.entities
       .filter((entity) => entity.kind === 'alien' && entity.health > 0)
-      .sort((left, right) => left.morphology.localeCompare(right.morphology) || left.id - right.id);
-    const signature = aliens.map((entity) => entity.id + ':' + entity.generation + ':' + entity.morphology).join('|');
+      .sort((left, right) => String(left.speciesName).localeCompare(String(right.speciesName)) || left.id - right.id);
+    const signature = aliens.map((entity) => entity.id + ':' + entity.generation + ':' + entity.morphology + ':' + entity.speciesName).join('|');
     if (signature !== colonySelectorSignature) {
       colonySelector.textContent = '';
       const placeholder = document.createElement('option');
       placeholder.value = '';
       placeholder.textContent = aliens.length ? 'Выбрать своего организма · ' + aliens.length : 'Сначала высадите организм';
       colonySelector.appendChild(placeholder);
-      for (const morphology of Object.keys(morphologyDefinitions)) {
-        const members = aliens.filter((entity) => entity.morphology === morphology);
-        if (!members.length) continue;
+      const speciesGroups = new Map();
+      for (const entity of aliens) {
+        const groupName = normalizeSpeciesName(entity.speciesName, morphologyDefinitions[entity.morphology].label);
+        if (!speciesGroups.has(groupName)) speciesGroups.set(groupName, []);
+        speciesGroups.get(groupName).push(entity);
+      }
+      for (const [groupName, members] of speciesGroups) {
         const group = document.createElement('optgroup');
-        group.label = morphologyDefinitions[morphology].label + ' · ' + members.length;
+        group.label = groupName + ' · ' + members.length;
         for (const entity of members) {
           const option = document.createElement('option');
           option.value = String(entity.id);
-          option.textContent = entity.name + ' · поколение ' + entity.generation;
+          option.textContent = entity.name + ' · ' + morphologyDefinitions[entity.morphology].label + ' · поколение ' + entity.generation;
           group.appendChild(option);
         }
         colonySelector.appendChild(group);
@@ -3115,7 +3416,7 @@ try {
 
     if (selected) {
       selectedPanel.hidden = false;
-      selectedText.textContent = selected.name + ' · ' + morphologyDefinitions[normalizeMorphology(selected.morphology, selected.kind, selected.id)].label + ' · глубина ' + Math.round(AQUARIUM_HEIGHT - selected.z) + ' · энергия ' + Math.round(selected.energy) + ' · здоровье ' + Math.round(selected.health) + ' · ' + selected.stateLabel;
+      selectedText.textContent = selected.name + ' · ' + selected.speciesName + ' · ' + morphologyDefinitions[normalizeMorphology(selected.morphology, selected.kind, selected.id)].label + ' · глубина ' + Math.round(AQUARIUM_HEIGHT - selected.z) + ' · энергия ' + Math.round(selected.energy) + ' · здоровье ' + Math.round(selected.health) + ' · ' + selected.stateLabel;
     } else {
       selectedPanel.hidden = true;
     }
@@ -3139,6 +3440,10 @@ try {
     view.height = rect.height;
     view.dpr = Math.min(1.6, window.devicePixelRatio || 1);
     if (aquarium3d) aquarium3d.resize(view.width, view.height, view.dpr);
+    if (speciesPreview3d) {
+      const previewRect = speciesPreviewCanvas.getBoundingClientRect();
+      speciesPreview3d.resize(previewRect.width, previewRect.height, view.dpr);
+    }
   }
 
   function coatColor(coat, lightShift, saturationShift) {
@@ -3781,10 +4086,38 @@ try {
   }
 
   let first3dFrame = true;
+  function previewEntityFromDraft() {
+    const draft = cloneGenome(state.draftGenome || state.genome);
+    const traits = deriveStatsFromGenes('alien', draft);
+    return {
+      id: -1,
+      kind: 'alien',
+      morphology: draft.morphology,
+      speciesName: draft.speciesName,
+      appearance: draft.appearance,
+      coat: draft.coat,
+      displayCoat: { ...draft.coat },
+      abilities: draft.abilities,
+      traits,
+      x: LOGICAL_WIDTH * 0.5,
+      y: LOGICAL_HEIGHT * 0.5,
+      z: 8,
+      heading: 0,
+      visualPhase: 0.7,
+      visualVisibility: clamp(1.08 - traits.camouflageEffect * 0.18, 0.48, 0.95),
+      vx: draft.abilities.sprint ? traits.maxSpeed : 0,
+      vy: 0,
+      vz: 0,
+      energy: traits.maxEnergy * 0.78,
+      health: traits.maxHealth * (draft.abilities.regeneration ? 0.72 : 1)
+    };
+  }
+
   function draw(seconds) {
     if (!view.width || !view.height || !aquarium3d) return;
     for (const entity of state.entities) entity.visualVisibility = entityVisibility(entity);
     aquarium3d.render(state, seconds, visual.hoverId);
+    if (speciesPreview3d) speciesPreview3d.renderPreview(previewEntityFromDraft(), seconds);
     if (first3dFrame) {
       first3dFrame = false;
       if (loading3d) {
@@ -3835,7 +4168,7 @@ try {
     entity.manualUntil = state.worldDays + 2.8;
     const brain = brainProfile(entity.traits.intelligence);
     const abilities = abilityLabels(entity.abilities);
-    addEvent(entity.name + ' высажен. Форма: ' + morphologyDefinitions[entity.morphology].label + '. Потрачено ' + cost + ' очков. Мозг: ' + brain.tier + ', факторов: ' + brain.factors.length + (abilities.length ? ', способности: ' + abilities.join(', ') : '') + '.', 'birth');
+    addEvent(entity.name + ' высажен как вид «' + entity.speciesName + '». Форма: ' + morphologyDefinitions[entity.morphology].label + '. Потрачено ' + cost + ' очков. Мозг: ' + brain.tier + ', факторов: ' + brain.factors.length + (abilities.length ? ', способности: ' + abilities.join(', ') : '') + '.', 'birth');
     updateConstructorUI();
     updateHud();
   }
@@ -3931,6 +4264,25 @@ try {
     state.draftGenome.morphology = normalizeMorphology(morphologySelect.value, 'alien', 0);
     updateConstructorUI();
   });
+  speciesNameInput.addEventListener('input', () => {
+    state.draftGenome.speciesName = speciesNameInput.value.slice(0, 32);
+    previewCaption.textContent = normalizeSpeciesName(state.draftGenome.speciesName, 'Новый вид') + ' · ' + morphologyDefinitions[state.draftGenome.morphology].label;
+  });
+  speciesNameInput.addEventListener('blur', () => {
+    state.draftGenome.speciesName = normalizeSpeciesName(speciesNameInput.value, 'Новый вид');
+    updateConstructorUI();
+  });
+  appearanceNames.forEach((name) => appearanceInputs[name].addEventListener('input', () => {
+    const limits = appearanceLimits[name];
+    state.draftGenome.appearance[name] = clamp(Number(appearanceInputs[name].value) || 0, limits[0], limits[1]);
+    appearanceValueLabels[name].textContent = state.draftGenome.appearance[name].toFixed(2);
+  }));
+  patternSelect.addEventListener('change', () => {
+    state.draftGenome.appearance.pattern = patternSelect.value;
+  });
+  accentColorInput.addEventListener('input', () => {
+    state.draftGenome.appearance.accent = hexToHsl(accentColorInput.value);
+  });
   coatColorInput.addEventListener('input', () => {
     state.draftGenome.coat = hexToHsl(coatColorInput.value);
     updateConstructorUI();
@@ -3940,6 +4292,55 @@ try {
     updateConstructorUI();
   }));
   loadTemplateButton.addEventListener('click', () => loadGenomeTemplate(templateSelect.value, true));
+  speciesLibrarySelect.addEventListener('change', () => {
+    const hasSelection = Boolean(speciesLibrarySelect.value);
+    loadSpeciesButton.disabled = !hasSelection;
+    deleteSpeciesButton.disabled = !hasSelection;
+  });
+  saveSpeciesButton.addEventListener('click', () => {
+    const genome = cloneGenome({
+      ...state.draftGenome,
+      speciesName: normalizeSpeciesName(speciesNameInput.value, 'Новый вид')
+    });
+    const existing = state.speciesLibrary.find((entry) => entry.name.toLocaleLowerCase() === genome.speciesName.toLocaleLowerCase());
+    if (!existing && state.speciesLibrary.length >= 16) {
+      addEvent('Библиотека заполнена: можно сохранить не более 16 видов.', 'control');
+      updateHud();
+      return;
+    }
+    const entry = existing || {
+      id: 'species-' + Date.now().toString(36),
+      name: genome.speciesName,
+      genome
+    };
+    entry.name = genome.speciesName;
+    entry.genome = genome;
+    if (!existing) state.speciesLibrary.push(entry);
+    state.draftGenome = cloneGenome(genome);
+    updateConstructorUI();
+    updateSpeciesLibraryUI(entry.id);
+    save();
+    addEvent('Вид «' + entry.name + '» сохранён в библиотеке.', 'control');
+    updateHud();
+  });
+  loadSpeciesButton.addEventListener('click', () => {
+    const entry = state.speciesLibrary.find((candidate) => candidate.id === speciesLibrarySelect.value);
+    if (!entry) return;
+    state.draftGenome = cloneGenome(entry.genome);
+    updateConstructorUI();
+    updateSpeciesLibraryUI(entry.id);
+    addEvent('Вид «' + entry.name + '» загружен в конструктор.', 'control');
+    updateHud();
+  });
+  deleteSpeciesButton.addEventListener('click', () => {
+    const entry = state.speciesLibrary.find((candidate) => candidate.id === speciesLibrarySelect.value);
+    if (!entry || !window.confirm('Удалить сохранённый вид «' + entry.name + '»?')) return;
+    state.speciesLibrary = state.speciesLibrary.filter((candidate) => candidate.id !== entry.id);
+    updateSpeciesLibraryUI();
+    save();
+    addEvent('Вид «' + entry.name + '» удалён из библиотеки.', 'control');
+    updateHud();
+  });
   deployGenomeButton.addEventListener('click', () => {
     const cost = genomeCost(state.draftGenome);
     if (state.points < cost || state.gameStatus !== 'playing') return;
@@ -3963,6 +4364,8 @@ try {
       entity.traits = deriveStatsFromGenes('alien', state.genome);
       entity.diet = state.genome.diet;
       entity.morphology = state.genome.morphology;
+      entity.speciesName = state.genome.speciesName;
+      entity.appearance = normalizeAppearance(state.genome.appearance, 'alien', entity.id, entity.morphology);
       entity.coat = normalizeCoat(state.genome.coat, archetypes.alien.baseCoat);
       entity.displayCoat = { ...entity.coat };
       entity.abilities = normalizeAbilities(state.genome.abilities);
@@ -3970,7 +4373,7 @@ try {
       entity.energy = entity.traits.maxEnergy * energyRatio;
       entity.thinkTimer = 0;
     }
-    addEvent('Геном колонии обновлён за ' + applyCost + ' очков: форма ' + morphologyDefinitions[state.genome.morphology].label + ', ' + state.genome.diet + ', покров ' + hslToHex(state.genome.coat).toUpperCase() + ', способности: ' + (abilityLabels(state.genome.abilities).join(', ') || 'нет') + '.', 'control');
+    addEvent('Геном колонии обновлён за ' + applyCost + ' очков: вид «' + state.genome.speciesName + '», форма ' + morphologyDefinitions[state.genome.morphology].label + ', ' + state.genome.diet + ', покров ' + hslToHex(state.genome.coat).toUpperCase() + ', способности: ' + (abilityLabels(state.genome.abilities).join(', ') || 'нет') + '.', 'control');
     updateConstructorUI();
     updateHud();
   });
@@ -4038,6 +4441,12 @@ try {
     canvas.style.cursor = state.deployArmed ? 'copy' : 'grab';
   });
   window.addEventListener('resize', resizeCanvas);
+  for (const details of [constructorDetails, visualEditorDetails]) {
+    if (!details) continue;
+    details.addEventListener('toggle', () => {
+      if (details.open) window.requestAnimationFrame(resizeCanvas);
+    });
+  }
 
   window.addEventListener('keydown', (event) => {
     const selected = selectedEntity();
