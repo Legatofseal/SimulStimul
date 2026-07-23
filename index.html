@@ -1437,7 +1437,7 @@ try {
 
   const state = {
     mode: 'god',
-    speedIndex: 0,
+    speedIndex: speeds.length - 1,
     worldDays: 1168,
     rng: 71319,
     selectedId: null,
@@ -3893,6 +3893,7 @@ try {
     }
     state.rng = (Date.now() ^ 0x5f3759df) >>> 0;
     state.goal = 'conquest';
+    state.speedIndex = speeds.length - 1;
     state.genome = cloneGenome(genomeTemplates.balanced);
     state.draftGenome = cloneGenome(genomeTemplates.balanced);
     templateSelect.value = 'balanced';
